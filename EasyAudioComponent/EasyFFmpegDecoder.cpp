@@ -1,5 +1,7 @@
 #include "EasyFFmpegDecoder.h"
 
+#include <QDebug>
+
 EasyFFmpegDecoder::EasyFFmpegDecoder()
 {
 
@@ -31,7 +33,7 @@ bool EasyFFmpegDecoder::open(const QAudioFormat &format)
 
     //解析前重置变量及相关标志位
     setOpen(false);
-    setEnd(true);
+    setEnd(false);
     dataTemp.clear();
 
     //初始化缓冲区
@@ -45,6 +47,8 @@ bool EasyFFmpegDecoder::open(const QAudioFormat &format)
     inFormat = theContextPtr->audioFormat();
     //目标格式的参数
     outFormat = EasyFFmpegContext::getFormat(format);
+    //qDebug()<<"in format"<<inFormat.channels<<inFormat.sampleRate<<inFormat.sampleByte;
+    //qDebug()<<"out format"<<outFormat.channels<<outFormat.sampleRate<<outFormat.sampleByte;
 
     //区分planar和packed??
     //const bool out_is_planar=(out_sample_fmt>AV_SAMPLE_FMT_DBL&&out_sample_fmt!=AV_SAMPLE_FMT_S64);
@@ -320,6 +324,8 @@ void EasyFFmpegDecoder::resetOutBuffer(int bufferSize)
         delete [] out_buffer;
     }
     out_bufsize = bufferSize*1.2;
+    if(out_bufsize%2 != 0)
+        out_bufsize += 1;
     out_buffer = new uint8_t[out_bufsize];
     out_buffer_arr[0] = out_buffer;
     out_buffer_arr[1] = out_buffer+out_bufsize/2;

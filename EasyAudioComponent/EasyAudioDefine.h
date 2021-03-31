@@ -75,7 +75,7 @@ struct EasyWavHead
     //params:参数信息
     //dataSize:pcm数据字节长度
     //return EasyAudioWavHead: wav头
-    static EasyWavHead createHead(const QAudioFormat &params,unsigned int dataSize);
+    static EasyWavHead createHead(const QAudioFormat &format,unsigned int dataSize);
 };
 #pragma pack(pop)
 Q_DECLARE_METATYPE(EasyWavHead)

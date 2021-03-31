@@ -2,14 +2,14 @@
 
 #include <QDebug>
 
-EasyWavHead EasyWavHead::createHead(const QAudioFormat &params, unsigned int dataSize)
+EasyWavHead EasyWavHead::createHead(const QAudioFormat &format, unsigned int dataSize)
 {
     //采样精度位数
-    const int bits = params.sampleSize();
+    const int bits = format.sampleSize();
     //通道数
-    const int channels = params.channelCount();
+    const int channels = format.channelCount();
     //采样率
-    const int sample_rate = params.sampleRate();
+    const int sample_rate = format.sampleRate();
     //格式头字节数
     const int head_size = sizeof(EasyWavHead);
     EasyWavHead wav_head;

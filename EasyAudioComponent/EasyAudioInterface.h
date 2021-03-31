@@ -73,6 +73,8 @@ public:
     //size:期望返回的数据的最大长度
     //转码失败或者结束则返回数据为空
     virtual QByteArray read(qint64 maxSize) = 0;
+    //转码数据，暂时忽略
+    //virtual qint64 read(char *outBuffer, qint64 maxSize) = 0;
     //结束解码
     virtual void close() = 0;
 

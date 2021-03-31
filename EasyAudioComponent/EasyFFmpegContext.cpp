@@ -60,6 +60,7 @@ EasyFFmpegContext::ArgFormat EasyFFmpegContext::audioFormat() const
 EasyFFmpegContext::ArgFormat EasyFFmpegContext::getFormat(const QAudioFormat &qtformat)
 {
     ArgFormat format;
+    //valid会判断设置的四个参数，以及codec
     if(qtformat.isValid()){
         format.channels = qtformat.channelCount();
         format.sampleRate = qtformat.sampleRate();
@@ -93,6 +94,8 @@ EasyFFmpegContext::ArgFormat EasyFFmpegContext::getFormat(const QAudioFormat &qt
         }
         format.sampleFmt = format_fmt;
         format.sampleByte = av_get_bytes_per_sample(format.sampleFmt);
+    }else{
+        qDebug()<<"invalid format"<<qtformat;
     }
     return format;
 }

@@ -6,6 +6,7 @@
 #include "EasyAudioDefine.h"
 #include "EasyAudioInterface.h"
 #include "EasyFFmpegContext.h"
+#include "EasyFFmpegDecoder.h"
 
 /**
  * @brief 组件类型注册

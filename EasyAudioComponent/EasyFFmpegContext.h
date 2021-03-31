@@ -29,7 +29,7 @@ public:
     struct ArgFormat
     {
         int channels = 1;
-        int sampleRate = 1600;
+        int sampleRate = 16000;
         AVSampleFormat sampleFmt = AV_SAMPLE_FMT_S16;
         //sampleFmt对应的字节数
         int sampleByte = 2;
