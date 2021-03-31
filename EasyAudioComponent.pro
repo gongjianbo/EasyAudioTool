@@ -15,6 +15,7 @@ DESTDIR += $$PWD/bin
 DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
+        EasyTest.cpp \
         main.cpp
 
 RESOURCES += qml.qrc
@@ -26,3 +27,6 @@ include($$PWD/EasyAudioComponent/EasyAudioComponent.pri)
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+HEADERS += \
+    EasyTest.h

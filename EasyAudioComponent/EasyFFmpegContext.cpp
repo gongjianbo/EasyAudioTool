@@ -2,7 +2,6 @@
 
 #include <QFileInfo>
 #include <QFile>
-#include <QDateTime>
 #include <QDebug>
 
 EasyFFmpegContext::EasyFFmpegContext(const QString &filepath)

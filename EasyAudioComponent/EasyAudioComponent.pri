@@ -3,13 +3,17 @@ HEADERS += \
     $$PWD/EasyAudioInterface.h \
     $$PWD/EasyAudioRegister.h \
     $$PWD/EasyFFmpegContext.h \
-    $$PWD/EasyFFmpegDecoder.h
+    $$PWD/EasyFFmpegDecoder.h \
+    $$PWD/EasySilkContext.h \
+    $$PWD/EasySilkDecoder.h
 
 SOURCES += \
     $$PWD/EasyAudioDefine.cpp \
     $$PWD/EasyAudioInterface.cpp \
     $$PWD/EasyFFmpegContext.cpp \
-    $$PWD/EasyFFmpegDecoder.cpp
+    $$PWD/EasyFFmpegDecoder.cpp \
+    $$PWD/EasySilkContext.cpp \
+    $$PWD/EasySilkDecoder.cpp
 
 greaterThan(QT_MAJOR_VERSION, 4) {
     TARGET_ARCH=$${QT_ARCH}

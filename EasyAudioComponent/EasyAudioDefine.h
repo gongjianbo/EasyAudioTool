@@ -7,15 +7,7 @@
 #include <memory>
 #include <cmath>
 #include <algorithm>
-//在头文件导入只是偷个懒
-extern "C" {
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libavformat/avio.h>
-#include <libswresample/swresample.h>
-#include <libavutil/frame.h>
-#include <libavutil/mem.h>
-}
+#include <functional>
 
 //[]在上一版wav-pcm转换参数使用了自定义类型，现采用QAudioFormat
 //struct SimpleAudioParameter

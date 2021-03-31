@@ -1,16 +1,22 @@
-#ifndef EASYFFMPEGCONTEXT_H
-#define EASYFFMPEGCONTEXT_H
-
+#pragma once
 #include "EasyAudioDefine.h"
 #include "EasyAudioInterface.h"
+extern "C" {
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
+#include <libavformat/avio.h>
+#include <libswresample/swresample.h>
+#include <libavutil/frame.h>
+#include <libavutil/mem.h>
+}
 
 /**
- * @brief FFmpeg相关上下文
+ * @brief FFmpeg库相关上下文
  * @author 龚建波
  * @date 2021-03-30
  * @details
- * 去掉了拷贝和赋值，需要作为参数传递时请使用智能指针管理
- * （为什么用 NULL 不用 nullptr，为了和 C 保持一致）
+ * 1.去掉了拷贝和赋值，需要作为参数传递时请使用智能指针管理
+ * 2.空指针主要用 NULL，为了和 C 接口保持一致
  *
  * 内存管理参考：
  * https://www.jianshu.com/p/9f45d283d904
@@ -42,8 +48,19 @@ public:
     EasyAudioInfo audioInfo() const override;
     //重采样时需要源数据的通道、采样率、精度信息
     EasyFFmpegContext::ArgFormat audioFormat() const;
+
     //QAudioFormat转为ArgFormat
     static EasyFFmpegContext::ArgFormat getFormat(const QAudioFormat &qtformat);
+    //获取pcm数据(使用重采样libswresample)
+    //contextPtr:上下文指针
+    //params:目标格式的参数，如果参数无效会使用原数据参数
+    //callBack:转换时的同步回调函数
+    // 每次packet处理都会调用，若返回false则整个toPcm无效返回false
+    // 回调函数参描1为输出缓冲区地址，参数2为输出数据有效字节长度
+    //return false:表示转换无效失败
+    static bool toPcm(const QString &filepath,
+                      int sampleRate,
+                      std::function<bool(const char *outData, int outSize)> callBack);
 
 private:
     //初始化与释放
@@ -69,4 +86,3 @@ private:
     Q_DISABLE_COPY_MOVE(EasyFFmpegContext)
 };
 
-#endif // EASYFFMPEGCONTEXT_H

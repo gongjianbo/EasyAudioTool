@@ -1,6 +1,4 @@
-#ifndef EASYFFMPEGDECODER_H
-#define EASYFFMPEGDECODER_H
-
+#pragma once
 #include "EasyFFmpegContext.h"
 
 /**
@@ -8,8 +6,9 @@
  * @author 龚建波
  * @date 2021-03-30
  * @details
- * 主要功能为将音频数据解码为PCM
- * （本类只处理编解码，不带多线程处理部分）
+ * 1.主要功能为将音频数据解码为PCM
+ * 2.本类只处理编解码，不带多线程处理部分
+ * 3.转换采用libswresample，该模块主要功能为采样率-声道-样本格式转换等
  *
  * 测试文件地址：
  * https://samples.mplayerhq.hu/A-codecs/
@@ -77,4 +76,3 @@ private:
     uint8_t *out_buffer_arr[2] = { NULL, NULL};
 };
 
-#endif // EASYFFMPEGDECODER_H
