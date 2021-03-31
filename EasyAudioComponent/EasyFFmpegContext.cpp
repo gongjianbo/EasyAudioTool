@@ -40,6 +40,7 @@ EasyAudioInfo EasyFFmpegContext::audioInfo() const
     //2020-12-31 测试一个ape文件时发现音频信息比特率为0，现判断无效则使用容器比特率
     info.bitRate = codecCtx->bit_rate<1?formatCtx->bit_rate:codecCtx->bit_rate; //bps
     info.duration = formatCtx->duration/(AV_TIME_BASE/1000.0);  //ms
+    info.valid = true;
 
     return info;
 }

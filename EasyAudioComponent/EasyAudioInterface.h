@@ -56,7 +56,7 @@ public:
     virtual ~EasyAbstractDecoder() = default;
 
     //绑定一个上下文进行处理
-    //virtual void setContext(const QSharedPointer<EasyAbstractContext> &contextPtr) = 0;
+    virtual void setContext(const QSharedPointer<EasyAbstractContext> &contextPtr) = 0;
     //是否为有效的音频文件（该解码器可解析）
     //判断为有效时才进行后续操作
     virtual bool isValid() const = 0;

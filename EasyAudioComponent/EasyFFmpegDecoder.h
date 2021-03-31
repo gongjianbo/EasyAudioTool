@@ -28,7 +28,7 @@ public:
     ~EasyFFmpegDecoder();
 
     //绑定一个上下文进行处理
-    void setContext(const QSharedPointer<EasyFFmpegContext> &contextPtr);
+    void setContext(const QSharedPointer<EasyAbstractContext> &contextPtr) override;
 
     //是否为有效的音频文件（该解码器可解析）
     //判断为有效时才进行后续操作

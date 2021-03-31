@@ -1,9 +1,14 @@
 #include "EasyTest.h"
 
-#include "EasyAudioRegister.h"
 #include <QFile>
 #include <QDebug>
 #include <thread>
+
+#include "EasyFFmpegContext.h"
+#include "EasyFFmpegDecoder.h"
+#include "EasySilkContext.h"
+#include "EasySilkDecoder.h"
+#include "EasyAudioFactory.h"
 
 QAudioFormat fmt;
 
@@ -23,13 +28,16 @@ void EasyTest::TestAll()
         const QString silk_src="D:/Temp/weixin.amr";
         SilkRead(silk_src);
         SilkReadAll(silk_src);
+
+        FactoryContext(ffmpeg_src);
+        FactoryDecoder(silk_src);
     });
     th.detach();
 }
 
 void EasyTest::FFmpegRead(const QString &filepath)
 {
-    QSharedPointer<EasyFFmpegContext> cp(new EasyFFmpegContext(filepath));
+    QSharedPointer<EasyAbstractContext> cp(new EasyFFmpegContext(filepath));
     EasyFFmpegDecoder dec;
     dec.setContext(cp);
     bool result=false;
@@ -54,7 +62,7 @@ void EasyTest::FFmpegRead(const QString &filepath)
 
 void EasyTest::FFmpegReadAll(const QString &filepath)
 {
-    QSharedPointer<EasyFFmpegContext> cp(new EasyFFmpegContext(filepath));
+    QSharedPointer<EasyAbstractContext> cp(new EasyFFmpegContext(filepath));
     EasyFFmpegDecoder dec;
     dec.setContext(cp);
     bool result=false;
@@ -75,7 +83,7 @@ void EasyTest::FFmpegReadAll(const QString &filepath)
 
 void EasyTest::SilkRead(const QString &filepath)
 {
-    QSharedPointer<EasySilkContext> cp(new EasySilkContext(filepath));
+    QSharedPointer<EasyAbstractContext> cp(new EasySilkContext(filepath));
     EasySilkDecoder dec;
     dec.setContext(cp);
     bool result=false;
@@ -100,7 +108,7 @@ void EasyTest::SilkRead(const QString &filepath)
 
 void EasyTest::SilkReadAll(const QString &filepath)
 {
-    QSharedPointer<EasySilkContext> cp(new EasySilkContext(filepath));
+    QSharedPointer<EasyAbstractContext> cp(new EasySilkContext(filepath));
     EasySilkDecoder dec;
     dec.setContext(cp);
     bool result=false;
@@ -117,4 +125,34 @@ void EasyTest::SilkReadAll(const QString &filepath)
         dec.close();
     }
     qDebug()<<"Test silkreadall result"<<result;
+}
+
+void EasyTest::FactoryContext(const QString &filepath)
+{
+    QSharedPointer<EasyAbstractContext> sp=EasyAudioFactory::createContext(filepath);
+    bool result=false;
+    if(sp&&sp->isValid()){
+        EasyAudioInfo info = sp->audioInfo();
+        result=info.valid;
+    }
+    qDebug()<<"Test factory context result"<<result;
+}
+
+void EasyTest::FactoryDecoder(const QString &filepath)
+{
+    QSharedPointer<EasyAbstractDecoder> sp=EasyAudioFactory::createDecoder(filepath);
+    bool result=false;
+    if(sp&&sp->isValid()&&sp->open(fmt)){
+        QByteArray data=sp->readAll();
+        EasyWavHead head=EasyWavHead::createHead(fmt,data.size());
+        QFile file(filepath+"_factorydecoder.wav");
+        if(data.size()>0&&file.open(QIODevice::WriteOnly)){
+            file.write(QByteArray((char*)&head,sizeof(EasyWavHead)));
+            file.write(data);
+            file.close();
+            result=true;
+        }
+        sp->close();
+    }
+    qDebug()<<"Test factory decoder result"<<result;
 }

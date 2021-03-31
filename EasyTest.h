@@ -13,6 +13,9 @@ struct EasyTest
 
     void SilkRead(const QString &filepath);
     void SilkReadAll(const QString &filepath);
+
+    void FactoryContext(const QString &filepath);
+    void FactoryDecoder(const QString &filepath);
 };
 
 #endif // EASYTEST_H

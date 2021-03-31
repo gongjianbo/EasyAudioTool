@@ -47,6 +47,7 @@ EasyAudioInfo EasySilkContext::audioInfo() const
         info.bitRate = 16000*16*1; //bps
         //sample_rate/1000就是1ms的采样数，因为一个点两个字节所以减半
         info.duration = total_byte/(sample_rate/1000*2);  //ms
+        info.valid = true;
     }
     //信息暂存起来
     hasInfoTemp = true;

@@ -1,5 +1,6 @@
 HEADERS += \
     $$PWD/EasyAudioDefine.h \
+    $$PWD/EasyAudioFactory.h \
     $$PWD/EasyAudioInterface.h \
     $$PWD/EasyAudioRegister.h \
     $$PWD/EasyFFmpegContext.h \
@@ -9,6 +10,7 @@ HEADERS += \
 
 SOURCES += \
     $$PWD/EasyAudioDefine.cpp \
+    $$PWD/EasyAudioFactory.cpp \
     $$PWD/EasyAudioInterface.cpp \
     $$PWD/EasyFFmpegContext.cpp \
     $$PWD/EasyFFmpegDecoder.cpp \

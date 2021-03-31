@@ -12,12 +12,12 @@ EasySilkDecoder::~EasySilkDecoder()
     close();
 }
 
-void EasySilkDecoder::setContext(const QSharedPointer<EasySilkContext> &contextPtr)
+void EasySilkDecoder::setContext(const QSharedPointer<EasyAbstractContext> &contextPtr)
 {
     close();
     //If the reference count of the old shared data object becomes 0,
     //the old shared data object is deleted.
-    theContextPtr = contextPtr;
+    theContextPtr = contextPtr.dynamicCast<EasySilkContext>();
 }
 
 bool EasySilkDecoder::isValid() const

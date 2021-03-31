@@ -133,6 +133,9 @@ struct EasyAudioInfo
     //音频时长，毫秒:ms
     qint64 duration;
 
+    //有效性标识
+    bool valid = false;
+
     //打印参数信息
     void dumpAudioInfo();
 };

@@ -12,12 +12,12 @@ EasyFFmpegDecoder::~EasyFFmpegDecoder()
     close();
 }
 
-void EasyFFmpegDecoder::setContext(const QSharedPointer<EasyFFmpegContext> &contextPtr)
+void EasyFFmpegDecoder::setContext(const QSharedPointer<EasyAbstractContext> &contextPtr)
 {
     close();
     //If the reference count of the old shared data object becomes 0,
     //the old shared data object is deleted.
-    theContextPtr = contextPtr;
+    theContextPtr = contextPtr.dynamicCast<EasyFFmpegContext>();
 }
 
 bool EasyFFmpegDecoder::isValid() const
