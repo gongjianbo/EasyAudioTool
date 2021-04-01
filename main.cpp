@@ -15,8 +15,7 @@ int main(int argc, char *argv[])
 
     EasyAudioRegister::registerQmlType(&engine);
     EasyAudioRegister::registerMetaType();
-    //EasyTest test;
-    //test.TestAll();
+    qmlRegisterType<EasyTest>("Test",1,0,"EasyTest");
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,

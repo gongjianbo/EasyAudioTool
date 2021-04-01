@@ -91,8 +91,16 @@ public:
         //,Sndfile
         //,Libav
     };
-public:
-    //QAudioFormat ffmpegToQtFormat(int channels, int sampleRate, AVSampleFormat sampleFmt);
+    Q_ENUM(CodecType)
+
+    //播放状态
+    enum PlayerState
+    {
+        Stopped //未操作，停止状态
+        ,Paused //暂停
+        ,Playing //播放
+    };
+    Q_ENUM(PlayerState)
 };
 
 /**

@@ -2,9 +2,12 @@ HEADERS += \
     $$PWD/EasyAudioDefine.h \
     $$PWD/EasyAudioFactory.h \
     $$PWD/EasyAudioInterface.h \
+    $$PWD/EasyAudioPlayer.h \
     $$PWD/EasyAudioRegister.h \
     $$PWD/EasyFFmpegContext.h \
     $$PWD/EasyFFmpegDecoder.h \
+    $$PWD/EasyPlayerBuffer.h \
+    $$PWD/EasyPlayerCore.h \
     $$PWD/EasySilkContext.h \
     $$PWD/EasySilkDecoder.h
 
@@ -12,8 +15,11 @@ SOURCES += \
     $$PWD/EasyAudioDefine.cpp \
     $$PWD/EasyAudioFactory.cpp \
     $$PWD/EasyAudioInterface.cpp \
+    $$PWD/EasyAudioPlayer.cpp \
     $$PWD/EasyFFmpegContext.cpp \
     $$PWD/EasyFFmpegDecoder.cpp \
+    $$PWD/EasyPlayerBuffer.cpp \
+    $$PWD/EasyPlayerCore.cpp \
     $$PWD/EasySilkContext.cpp \
     $$PWD/EasySilkDecoder.cpp
 

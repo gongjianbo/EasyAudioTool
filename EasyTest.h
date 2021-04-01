@@ -1,21 +1,31 @@
-#ifndef EASYTEST_H
-#define EASYTEST_H
-
+#pragma once
 #include <QObject>
+#include "EasyAudioPlayer.h"
 
 //本地测试
-struct EasyTest
+class EasyTest : public QObject
 {
-    void TestAll();
+    Q_OBJECT
+public:
+    using QObject::QObject;
 
-    void FFmpegRead(const QString &filepath);
-    void FFmpegReadAll(const QString &filepath);
+public slots:
+    //【】
+    void testDecoder();
 
-    void SilkRead(const QString &filepath);
-    void SilkReadAll(const QString &filepath);
+    void tFFmpegRead(const QString &filepath);
+    void tFFmpegReadAll(const QString &filepath);
 
-    void FactoryContext(const QString &filepath);
-    void FactoryDecoder(const QString &filepath);
+    void tSilkRead(const QString &filepath);
+    void tSilkReadAll(const QString &filepath);
+
+    void tFactoryContext(const QString &filepath);
+    void tFactoryDecoder(const QString &filepath);
+
+    //【】
+    void testPlayer();
+
+private:
+    EasyAudioPlayer player;
 };
 
-#endif // EASYTEST_H

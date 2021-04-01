@@ -1,5 +1,6 @@
 #include "EasyTest.h"
 
+#include <QCoreApplication>
 #include <QFile>
 #include <QDebug>
 #include <thread>
@@ -12,7 +13,7 @@
 
 QAudioFormat fmt;
 
-void EasyTest::TestAll()
+void EasyTest::testDecoder()
 {
     fmt.setCodec("audio/pcm");
     fmt.setChannelCount(1);
@@ -21,21 +22,25 @@ void EasyTest::TestAll()
     fmt.setSampleType(QAudioFormat::SignedInt);
 
     std::thread th([this]{
-        const QString ffmpeg_src="D:/Temp/1.flac";
-        FFmpegRead(ffmpeg_src);
-        FFmpegReadAll(ffmpeg_src);
+        const QString app_dir=qApp->applicationDirPath();
 
-        const QString silk_src="D:/Temp/weixin.amr";
-        SilkRead(silk_src);
-        SilkReadAll(silk_src);
+        const QString ffmpeg_src=app_dir+"/audio/audio.flac";
+        tFFmpegRead(ffmpeg_src);
+        tFFmpegReadAll(ffmpeg_src);
 
-        FactoryContext(ffmpeg_src);
-        FactoryDecoder(silk_src);
+        const QString silk_src=app_dir+"/audio/weixin.amr";
+        tSilkRead(silk_src);
+        tSilkReadAll(silk_src);
+
+        tFactoryContext(ffmpeg_src);
+        tFactoryDecoder(silk_src);
+        fmt.setChannelCount(2);
+        tFactoryDecoder(ffmpeg_src);
     });
     th.detach();
 }
 
-void EasyTest::FFmpegRead(const QString &filepath)
+void EasyTest::tFFmpegRead(const QString &filepath)
 {
     QSharedPointer<EasyAbstractContext> cp(new EasyFFmpegContext(filepath));
     EasyFFmpegDecoder dec;
@@ -60,7 +65,7 @@ void EasyTest::FFmpegRead(const QString &filepath)
     qDebug()<<"Test ffmpegread result"<<result;
 }
 
-void EasyTest::FFmpegReadAll(const QString &filepath)
+void EasyTest::tFFmpegReadAll(const QString &filepath)
 {
     QSharedPointer<EasyAbstractContext> cp(new EasyFFmpegContext(filepath));
     EasyFFmpegDecoder dec;
@@ -81,7 +86,7 @@ void EasyTest::FFmpegReadAll(const QString &filepath)
     qDebug()<<"Test ffmpegreadall result"<<result;
 }
 
-void EasyTest::SilkRead(const QString &filepath)
+void EasyTest::tSilkRead(const QString &filepath)
 {
     QSharedPointer<EasyAbstractContext> cp(new EasySilkContext(filepath));
     EasySilkDecoder dec;
@@ -106,7 +111,7 @@ void EasyTest::SilkRead(const QString &filepath)
     qDebug()<<"Test silkread result"<<result;
 }
 
-void EasyTest::SilkReadAll(const QString &filepath)
+void EasyTest::tSilkReadAll(const QString &filepath)
 {
     QSharedPointer<EasyAbstractContext> cp(new EasySilkContext(filepath));
     EasySilkDecoder dec;
@@ -127,7 +132,7 @@ void EasyTest::SilkReadAll(const QString &filepath)
     qDebug()<<"Test silkreadall result"<<result;
 }
 
-void EasyTest::FactoryContext(const QString &filepath)
+void EasyTest::tFactoryContext(const QString &filepath)
 {
     QSharedPointer<EasyAbstractContext> sp=EasyAudioFactory::createContext(filepath);
     bool result=false;
@@ -138,7 +143,7 @@ void EasyTest::FactoryContext(const QString &filepath)
     qDebug()<<"Test factory context result"<<result;
 }
 
-void EasyTest::FactoryDecoder(const QString &filepath)
+void EasyTest::tFactoryDecoder(const QString &filepath)
 {
     QSharedPointer<EasyAbstractDecoder> sp=EasyAudioFactory::createDecoder(filepath);
     bool result=false;
@@ -156,3 +161,11 @@ void EasyTest::FactoryDecoder(const QString &filepath)
     }
     qDebug()<<"Test factory decoder result"<<result;
 }
+
+void EasyTest::testPlayer()
+{
+    const QString app_dir=qApp->applicationDirPath();
+    const QString ffmpeg_src=app_dir+"/audio/audio.mp3";
+    player.play(ffmpeg_src);
+}
+

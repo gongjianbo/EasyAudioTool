@@ -153,24 +153,39 @@ QByteArray EasyFFmpegDecoder::readAll()
                                                                   outFormat.sampleFmt,
                                                                   1);
                 //qDebug()<<"out"<<out_bufuse<<"sample"<<ret<<"channel"<<out_channels<<sample_bytes*out_samples;
-                if(out_bufuse < 1){
-                }if(outFormat.channels == 2){
-                    //双声道时提取左声道数据
-                    //planar左右声道单独放的，解码时不会转为planar所以不用判断
-                    //if(out_is_planar){
-                    //    pcm_data.append((const char*)out_buffer_arr[0], out_bufuse/2);
-                    //}else{
-                    //packed都在[0]，一左一右存放
-                    for(int i = 0; i < out_bufuse; i += outFormat.sampleByte*2)
-                    {
-                        //拼接pcm数据
-                        pcm_data.append((const char*)out_buffer_arr[0] + i, outFormat.sampleByte);
-                    }
-                }else if(outFormat.channels == 1){
-                    //单声道数据
-                    //拼接pcm数据
-                    pcm_data.append((const char*)out_buffer_arr[0], out_bufuse);
+                if(out_bufuse > 0){
+                    //拼接pcm数据，如果每个声道单独一个文件这里要区别设计
+                    pcm_data.append((const char*)out_buffer, out_bufuse);
                 }
+#if 0
+                //保留多声道分别处理的代码，双声道转为两个单声道文件时使用
+                if(out_channels==2)
+                {
+                    //双声道时提取左声道数据
+                    //双声道区分planaer和packed
+                    if(out_is_planar){
+                        //planaer左右声道单独放的
+                        if(!callBack((const char*)out_buffer_arr[0], out_bufuse/2)){
+                            return false;
+                        }
+                    }else{
+                        //packed都在[0]，一左一右存放
+                        for(int i = 0; i < out_bufuse; i += sample_bytes*2)
+                        {
+                            //回调false则整体失败返回false
+                            if(!callBack((const char*)out_buffer_arr[0] + i, sample_bytes)){
+                                return false;
+                            }
+                        }
+                    }
+                }else if(out_channels==1){
+                    //单声道数据
+                    //回调false则整体失败返回false
+                    if(!callBack((const char*)out_buffer_arr[0], out_bufuse)){
+                        return false;
+                    }
+                }
+#endif
                 av_frame_unref(frame);
             }
         }
@@ -251,23 +266,9 @@ QByteArray EasyFFmpegDecoder::read(qint64 maxSize)
                                                                   outFormat.sampleFmt,
                                                                   1);
                 //qDebug()<<"out"<<out_bufuse<<"sample"<<ret<<"channel"<<out_channels<<sample_bytes*out_samples;
-                if(out_bufuse < 1){
-                }if(outFormat.channels == 2){
-                    //双声道时提取左声道数据
-                    //planar左右声道单独放的，解码时不会转为planar所以不用判断
-                    //if(out_is_planar){
-                    //    pcm_data.append((const char*)out_buffer_arr[0], out_bufuse/2);
-                    //}else{
-                    //packed都在[0]，一左一右存放
-                    for(int i = 0; i < out_bufuse; i += outFormat.sampleByte*2)
-                    {
-                        //拼接pcm数据
-                        pcm_data.append((const char*)out_buffer_arr[0] + i, outFormat.sampleByte);
-                    }
-                }else if(outFormat.channels == 1){
-                    //单声道数据
-                    //拼接pcm数据
-                    pcm_data.append((const char*)out_buffer_arr[0], out_bufuse);
+                if(out_bufuse > 0){
+                    //拼接pcm数据，如果每个声道单独一个文件这里要区别设计
+                    pcm_data.append((const char*)out_buffer, out_bufuse);
                 }
                 av_frame_unref(frame);
 
