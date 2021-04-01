@@ -15,6 +15,7 @@ DESTDIR += $$PWD/bin
 DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
+        EasyModel.cpp \
         EasyTest.cpp \
         main.cpp
 
@@ -29,4 +30,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    EasyModel.h \
     EasyTest.h

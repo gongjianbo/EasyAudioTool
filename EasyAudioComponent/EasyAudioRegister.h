@@ -5,6 +5,7 @@
 
 #include "EasyAudioDefine.h"
 #include "EasyAudioInterface.h"
+#include "EasyAudioPlayer.h"
 
 /**
  * @brief 组件类型注册
@@ -17,6 +18,7 @@ struct EasyAudioRegister
     static void registerQmlType(QQmlEngine *engine)
     {
         QQmlContext *context = engine->rootContext();context;
+        qmlRegisterType<EasyAudioPlayer>("EasyAudio",1,0,"EasyAudioPlayer");
     }
 
     //元对象注册

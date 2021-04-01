@@ -5,8 +5,8 @@ import QtQuick.Layouts 1.12
 
 Window {
     visible: true
-    width: 640
-    height: 480
+    width: 1180
+    height: 720
     title: qsTr("Easy Audio Component (by GongJianBo 1992)")
 
     TabBar {

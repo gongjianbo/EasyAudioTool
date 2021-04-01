@@ -4,10 +4,14 @@
 
 #include "EasyAudioRegister.h"
 #include "EasyTest.h"
+#include "EasyModel.h"
 
 int main(int argc, char *argv[])
 {
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    QCoreApplication::setOrganizationName("EasyAudio");
+    QCoreApplication::setOrganizationDomain("https://blog.csdn.net/gongjianbo1992");
+    QCoreApplication::setApplicationName("EasyAudio");
 
     QApplication app(argc, argv);
 
@@ -16,6 +20,7 @@ int main(int argc, char *argv[])
     EasyAudioRegister::registerQmlType(&engine);
     EasyAudioRegister::registerMetaType();
     qmlRegisterType<EasyTest>("Test",1,0,"EasyTest");
+    qmlRegisterType<EasyModel>("Test",1,0,"EasyModel");
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,

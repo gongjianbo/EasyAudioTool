@@ -3,5 +3,6 @@
         <file>main.qml</file>
         <file>AudioList.qml</file>
         <file>AudioTest.qml</file>
+        <file>RowLabel.qml</file>
     </qresource>
 </RCC>
