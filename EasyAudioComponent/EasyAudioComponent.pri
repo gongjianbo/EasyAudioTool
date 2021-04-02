@@ -32,12 +32,12 @@ greaterThan(QT_MAJOR_VERSION, 4) {
 contains(TARGET_ARCH, x86_64) {
 #only x64 msvc
 win32{
-LIBS += $$PWD/../ffmpeg/lib/*.lib
-INCLUDEPATH += $$PWD/../ffmpeg/include
-DEPENDPATH += $$PWD/../ffmpeg/include
+LIBS += $$PWD/../3rd/ffmpeg/lib/*.lib
+INCLUDEPATH += $$PWD/../3rd/ffmpeg/include
+DEPENDPATH += $$PWD/../3rd/ffmpeg/include
 
-LIBS += $$PWD/../silksdk/lib/*.lib
-INCLUDEPATH += $$PWD/../silksdk/include
-DEPENDPATH += $$PWD/../silksdk/include
+LIBS += $$PWD/../3rd/silksdk/lib/*.lib
+INCLUDEPATH += $$PWD/../3rd/silksdk/include
+DEPENDPATH += $$PWD/../3rd/silksdk/include
 }
 }
