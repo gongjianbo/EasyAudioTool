@@ -3,6 +3,7 @@
 
 #include <QAbstractListModel>
 #include "EasyAudioDefine.h"
+#include "EasyAudioTool.h"
 
 struct ModelItem
 {
@@ -13,6 +14,7 @@ struct ModelItem
 class EasyModel : public QAbstractListModel
 {
     Q_OBJECT
+    Q_PROPERTY(EasyAudioTool *tool READ getTool CONSTANT)
 public:
     explicit EasyModel(QObject *parent = nullptr);
 
@@ -21,16 +23,17 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-signals:
-    void parseFinished(const QList<ModelItem> &data);
+    EasyAudioTool *getTool() { return &audioTool; }
 
 public slots:
-    void parseUrl(const QUrl &fileurl);
-    void parseDir(const QString &filedir);
-    void setAudioList(const QList<ModelItem> &data);
+    void parseUrl(const QUrl &fileurl, const QStringList &filter = QStringList());
+    void parseDir(const QString &filedir, const QStringList &filter = QStringList());
+    void clearAudio();
+    void appendAudio(const ModelItem &data);
 
 private:
     QList<ModelItem> audioList;
+    EasyAudioTool audioTool;
 };
 
 #endif // EASYMODEL_H

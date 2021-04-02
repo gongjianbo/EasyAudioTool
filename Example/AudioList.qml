@@ -147,7 +147,7 @@ ListView {
         selectFolder: true
         onAccepted: {
             console.log(folder);
-            easy_model.parseUrl(folder);
+            easy_model.parseUrl(folder,["*.wav","*.mp3"]);
         }
     }
 
@@ -158,11 +158,37 @@ ListView {
         height: 40
         color: "#999999"
 
-        Button{
-            text: "select dir"
-            onClicked: {
-                easy_dilaog.open();
+        Row{
+            x: 10
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 10
+
+            Button{
+                text: "select dir"
+                onClicked: {
+                    easy_dilaog.open();
+                }
             }
         }
+    }
+
+    ScrollBar.vertical: ScrollBar {
+        id: scroll_vertical
+        z: 10
+        //visible: true
+        implicitWidth: 18
+        contentItem: Rectangle{
+            visible: (scroll_vertical.size<1.0)
+            implicitWidth: 18
+            radius: 9
+            color: (scroll_vertical.hovered||scroll_vertical.pressed)
+                   ? "#555555"
+                   : "#888888"
+        }
+    }
+
+    BusyDialog{
+        id: busy_dialog
+        visible: easy_model.tool.processing
     }
 }

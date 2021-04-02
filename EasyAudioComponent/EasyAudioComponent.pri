@@ -1,9 +1,17 @@
+QT += core
+QT += gui
+QT += multimedia
+QT += concurrent
+
+CONFIG += c++11 utf8_source
+
 HEADERS += \
     $$PWD/EasyAudioDefine.h \
     $$PWD/EasyAudioFactory.h \
     $$PWD/EasyAudioInterface.h \
     $$PWD/EasyAudioPlayer.h \
     $$PWD/EasyAudioRegister.h \
+    $$PWD/EasyAudioTool.h \
     $$PWD/EasyFFmpegContext.h \
     $$PWD/EasyFFmpegDecoder.h \
     $$PWD/EasyPlayerBuffer.h \
@@ -16,6 +24,7 @@ SOURCES += \
     $$PWD/EasyAudioFactory.cpp \
     $$PWD/EasyAudioInterface.cpp \
     $$PWD/EasyAudioPlayer.cpp \
+    $$PWD/EasyAudioTool.cpp \
     $$PWD/EasyFFmpegContext.cpp \
     $$PWD/EasyFFmpegDecoder.cpp \
     $$PWD/EasyPlayerBuffer.cpp \

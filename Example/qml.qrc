@@ -4,5 +4,6 @@
         <file>AudioList.qml</file>
         <file>AudioTest.qml</file>
         <file>RowLabel.qml</file>
+        <file>BusyDialog.qml</file>
     </qresource>
 </RCC>

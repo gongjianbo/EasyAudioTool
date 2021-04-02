@@ -14,10 +14,10 @@ Window {
         width: parent.width
         padding: 1
         TabButton {
-            text: qsTr("Audio")
+            text: "AudioList"
         }
         TabButton {
-            text: qsTr("Test")
+            text: "AudioTest"
         }
         background: Rectangle{
             border.color: "black"

@@ -14,7 +14,12 @@ EasyModel::EasyModel(QObject *parent)
     qRegisterMetaType<ModelItem>("ModelItem");
     qRegisterMetaType<QList<ModelItem>>("QList<ModelItem>");
 
-    connect(this,&EasyModel::parseFinished,this,&EasyModel::setAudioList);
+    connect(&audioTool,&EasyAudioTool::parseFinished,
+            this,[this](const EasyAudioInfo &info){
+        ModelItem item;
+        item.info=info;
+        appendAudio(item);
+    });
     parseDir(qApp->applicationDirPath()+"/audio");
 }
 
@@ -77,40 +82,27 @@ QHash<int, QByteArray> EasyModel::roleNames() const
     };
 }
 
-void EasyModel::parseUrl(const QUrl &fileurl)
+void EasyModel::parseUrl(const QUrl &fileurl, const QStringList &filter)
 {
-    parseDir(fileurl.toLocalFile());
+    parseDir(fileurl.toLocalFile(),filter);
 }
 
-void EasyModel::parseDir(const QString &filedir)
+void EasyModel::parseDir(const QString &filedir, const QStringList &filter)
 {
-    std::thread th([this,filedir]{
-        QList<ModelItem> data;
-        QDir dir(filedir);
-        //列出dir(path)目录文件下所有文件
-        QList<QFileInfo> file_list = dir.entryInfoList(QDir::Files | QDir::Hidden | QDir::NoSymLinks);
-        //列出dir(path)目录下所有子文件夹
-        //QFileInfoList folder_list = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
-        //进行子文件夹folder_list递归遍历，将内容存入file_list容器
-        for(int i= 0; i < file_list.count(); i++)
-        {
-            //qDebug()<<file_list.at(i).filePath();
-            QSharedPointer<EasyAbstractContext> context=
-                    EasyAudioFactory::createContext(file_list.at(i).filePath());
-            if(context&&context->isValid()){
-                ModelItem item;
-                item.info=context->audioInfo();
-                data.push_back(item);
-            }
-        }
-        emit parseFinished(data);
-    });
-    th.detach();
+    clearAudio();
+    audioTool.parseDirPath(filedir,!filter.isEmpty(),filter);
 }
 
-void EasyModel::setAudioList(const QList<ModelItem> &data)
+void EasyModel::clearAudio()
 {
     beginResetModel();
-    audioList=data;
+    audioList.clear();
     endResetModel();
+}
+
+void EasyModel::appendAudio(const ModelItem &data)
+{
+    beginInsertRows(QModelIndex(),audioList.count(),audioList.count());
+    audioList.push_back(data);
+    endInsertRows();
 }

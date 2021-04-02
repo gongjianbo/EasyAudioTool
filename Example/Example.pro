@@ -5,8 +5,6 @@ QT += core
 QT += gui
 QT += widgets
 QT += quick
-QT += multimedia
-QT += concurrent
 
 CONFIG += c++11 utf8_source
 
