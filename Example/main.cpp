@@ -1,7 +1,21 @@
+#if (defined VLD_Check)&&(defined _DEBUG)
+#include "vld.h"
+#include <QDebug>
+struct VldLog{
+    ~VldLog(){
+        //我的环境qml没法自动输出vld日志，所以结束后主动调用下
+        //atexit时还未释放完全局变量，所以用init_seg提升下
+        qDebug()<<"vld log. leak count"<<VLDGetLeaksCount();
+        VLDReportLeaks();
+    }
+};
+#pragma init_seg(lib)
+VldLog vld_log;
+#endif
+
 #include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QSettings>
-
 #include "EasyAudioRegister.h"
 #include "EasyTest.h"
 #include "EasyModel.h"

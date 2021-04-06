@@ -12,6 +12,10 @@ DESTDIR += $$PWD/bin
 
 DEFINES += QT_DEPRECATED_WARNINGS
 
+HEADERS += \
+    EasyModel.h \
+    EasyTest.h
+
 SOURCES += \
         EasyModel.cpp \
         EasyTest.cpp \
@@ -27,6 +31,14 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-HEADERS += \
-    EasyModel.h \
-    EasyTest.h
+DEFINES += VLD_Check
+contains(DEFINES,VLD_Check){
+win32{
+INCLUDEPATH += "D:/Program Files (x86)/Visual Leak Detector/include"
+contains(QMAKE_HOST.arch, x86_64) {
+    LIBS += "D:/Program Files (x86)/Visual Leak Detector/lib/Win64/vld.lib"
+} else {
+    LIBS += "D:/Program Files (x86)/Visual Leak Detector/lib/Win32/vld.lib"
+} #end host.arch
+} #end win32
+} #end defines
