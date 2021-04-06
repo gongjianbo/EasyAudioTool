@@ -47,7 +47,8 @@ public:
 
 private:
     //设置处理状态
-    void setProcessing(bool on);
+    //on为处理启停，start时count为处理数，finished时count>0=true成功
+    void setProcessing(bool on, int count);
     //设置计数器值
     void setProcessProgress(int count, int success, int fail);
     //更新处理进度，result=true则增加success，否则增加fail计数
@@ -70,6 +71,11 @@ signals:
     void parseFinished(const EasyAudioInfo &info);
     //解析信息失败的文件列表
     void parseFailedChanged(const QStringList &files);
+    //【】转码
+    //类似解析，转码完一个音频文件后，信息信号槽传递出来
+    void transcodeFinished(const EasyAudioInfo &info);
+    //转码失败的文件列表
+    void transcodeFailedChanged(const QStringList &files);
 
 public slots:
     //【】解析
@@ -95,15 +101,30 @@ public slots:
     void parseDirUrl(const QUrl &dir,
                      bool useFilter = false,
                      const QStringList &filter = QStringList());
-
-    //停止操作
+    //【】转码
+    //转码多个文件，转码后存放到缓存文件夹然后emit路径出去
+    //（转码一般用提取完信息的文件，所以这列没加过滤参数）
+    //files: 文件列表
+    //channels: 目标格式通道数
+    //sampleRate: 目标格式采样率
+    //sampleBit: 目标格式采样存储类型枚举，暂未定义
+    void transcodePathList(const QList<QString> &files);
+    //QtQuick.Dialogs使用的url存储路径
+    void transcodeUrlList(const QList<QUrl> &files);
+    //单个文件转换编码，非线程
+    EasyAudioInfo transcodeFile(const QString &srcpath,
+                                const QString &dstpath,
+                                const QAudioFormat &format);
+    //【】停止操作
     //目前只是把标志位=false，处理逻辑去判断
     void stop();
+    //【】设置转码后的目标格式
+    void setTargetFormat(int channels, int sampleRate, int sampleBit, const QString &codec);
 
 private:
     //后缀过滤
     QStringList supportedSuffixs;
-    //临时数据缓存目录，默认为exe同级目录下easyCache文件夹
+    //数据缓存目录，默认为exe同级目录下easyCache文件夹
     QString cacheDir;
     //线程池
     QThreadPool taskPool;
@@ -119,5 +140,9 @@ private:
     std::atomic_int processSuccess = 0;
     //处理失败数
     std::atomic_int processFail = 0;
+
+    //转码后的目标格式
+    //主要设置channels、sampleRate、sampleBit、codec
+    QAudioFormat targetFormat;
 };
 
