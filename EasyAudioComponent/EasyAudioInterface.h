@@ -67,8 +67,14 @@ public:
     //设置读取位置，暂时忽略
     //virtual bool seek(qint64 offset) = 0;
     //转码所有数据
-    //转码失败则返回数据为空
-    virtual QByteArray readAll() = 0;
+    //callBack:转换时的同步回调函数
+    //  每次packet处理都会调用，若返回false则整个toPcm无效返回false
+    //  回调函数<参数1>为输出缓冲区地址，<参数2>为输出数据有效字节长度
+    //  （TODO 数据的左右声道感觉也可以在这里区分）
+    //如果设置了回调则无返回数据
+    //转码失败返回数据为空
+    virtual QByteArray readAll(std::function<bool (const char *, int)> callBack =
+            std::function<bool (const char *, int)>()) = 0;
     //转码数据
     //size:期望返回的数据的最大长度
     //转码失败或者结束则返回数据为空

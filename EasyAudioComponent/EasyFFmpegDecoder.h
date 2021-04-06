@@ -38,8 +38,11 @@ public:
     //return false:表示无法转换
     bool open(const QAudioFormat &format) override;
     //转码所有数据
-    //转码失败则返回数据为空
-    QByteArray readAll() override;
+    //callBack:转换时的同步回调函数
+    //如果设置了回调则无返回数据
+    //转码失败返回数据为空
+    QByteArray readAll(std::function<bool (const char *, int)> callBack =
+            std::function<bool (const char *, int)>()) override;
     //转码数据
     //size:期望返回的数据的最大长度
     //转码失败或者结束则返回数据为空

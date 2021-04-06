@@ -91,12 +91,13 @@ bool EasyFFmpegDecoder::open(const QAudioFormat &format)
     return true;
 }
 
-QByteArray EasyFFmpegDecoder::readAll()
+QByteArray EasyFFmpegDecoder::readAll(std::function<bool (const char *, int)> callBack)
 {
     QByteArray pcm_data;
     if(!isOpen())
         return pcm_data;
 
+    const bool has_callback = bool(callBack);
     int ret = 0;
     //av_read_frame取流的下一帧，这里循环读取
     //返回0表示成功，小于0表示错误或者文件尾
@@ -154,8 +155,14 @@ QByteArray EasyFFmpegDecoder::readAll()
                                                                   1);
                 //qDebug()<<"out"<<out_bufuse<<"sample"<<ret<<"channel"<<out_channels<<sample_bytes*out_samples;
                 if(out_bufuse > 0){
-                    //拼接pcm数据，如果每个声道单独一个文件这里要区别设计
-                    pcm_data.append((const char*)out_buffer, out_bufuse);
+                    //如果设置了回调，就调用回调函数把buf地址和数据字节长度传递出去
+                    if(has_callback){
+                        if(!callBack((const char *)out_buffer, out_bufuse))
+                            break;
+                    }else{
+                        //拼接pcm数据，如果每个声道单独一个文件这里要区别设计
+                        pcm_data.append((const char*)out_buffer, out_bufuse);
+                    }
                 }
 #if 0
                 //保留多声道分别处理的代码，双声道转为两个单声道文件时使用

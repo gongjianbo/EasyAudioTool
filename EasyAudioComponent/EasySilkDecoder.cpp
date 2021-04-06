@@ -85,12 +85,13 @@ bool EasySilkDecoder::open(const QAudioFormat &format)
     return true;
 }
 
-QByteArray EasySilkDecoder::readAll()
+QByteArray EasySilkDecoder::readAll(std::function<bool (const char *, int)> callBack)
 {
     QByteArray pcm_data;
     if(!isOpen())
         return pcm_data;
 
+    const bool has_callback = bool(callBack);
     SKP_int16 n_bytes = 0;
     SKP_int32 read_counter = 0;
     SKP_int16 len = 0;
@@ -138,8 +139,14 @@ QByteArray EasySilkDecoder::readAll()
             }
         } while (dec_ctrl.moreInternalDecoderFrames);
 
-        //拼接pcm数据
-        pcm_data.append((const char *)out,total_len*2);
+        //如果设置了回调，就调用回调函数把buf地址和数据字节长度传递出去
+        if(has_callback){
+            if(!callBack((const char *)out, total_len*2))
+                break;
+        }else{
+            //拼接pcm数据
+            pcm_data.append((const char *)out, total_len*2);
+        }
     }
 
     return pcm_data;
