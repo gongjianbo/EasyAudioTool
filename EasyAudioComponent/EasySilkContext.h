@@ -44,7 +44,6 @@ private:
     //音频源文件路径
     QString audiopath;
     //暂存音频信息，便于重复读取
-    //（因为时长需要解析完自己计算）
     mutable bool hasInfoTemp = false;
     mutable EasyAudioInfo infoTemp;
 

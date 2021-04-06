@@ -2,6 +2,7 @@
 
 #include <QFileInfo>
 #include <QFile>
+#include <QCryptographicHash>
 #include <QDebug>
 
 EasyFFmpegContext::EasyFFmpegContext(const QString &filepath)
@@ -17,6 +18,9 @@ EasyFFmpegContext::~EasyFFmpegContext()
 
 EasyAudioInfo EasyFFmpegContext::audioInfo() const
 {
+    if(hasInfoTemp)
+        return infoTemp;
+
     EasyAudioInfo info;
 
     //把需要的格式信息copy过来
@@ -24,6 +28,13 @@ EasyAudioInfo EasyFFmpegContext::audioInfo() const
     QFileInfo f_info(audiopath);
     info.filename = f_info.fileName();
     info.filesize = f_info.size();
+    QFile f_file(audiopath);
+    if(f_file.open(QIODevice::ReadOnly)){
+        QCryptographicHash q_hash(QCryptographicHash::Md5);
+        q_hash.addData(&f_file);
+        info.filemd5 = q_hash.result().toHex().toUpper();
+        f_file.close();
+    }
     if(!isValid())
         return info;
 
@@ -42,6 +53,9 @@ EasyAudioInfo EasyFFmpegContext::audioInfo() const
     info.duration = formatCtx->duration/(AV_TIME_BASE/1000.0);  //ms
     info.valid = true;
 
+    //信息暂存起来
+    hasInfoTemp = true;
+    infoTemp = info;
     return info;
 }
 

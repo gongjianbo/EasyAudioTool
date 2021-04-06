@@ -46,19 +46,21 @@ QVariant EasyModel::data(const QModelIndex &index, int role) const
         return audioList.at(row).info.filename;
     case Qt::UserRole+2: //size
         return audioList.at(row).info.filesize;
-    case Qt::UserRole+3: //format
+    case Qt::UserRole+3: //md5
+        return audioList.at(row).info.filemd5;
+    case Qt::UserRole+4: //format
         return audioList.at(row).info.format;
-    case Qt::UserRole+4: //encode
+    case Qt::UserRole+5: //encode
         return audioList.at(row).info.encode;
-    case Qt::UserRole+5: //channels
+    case Qt::UserRole+6: //channels
         return audioList.at(row).info.channels;
-    case Qt::UserRole+6: //sampleRate
+    case Qt::UserRole+7: //sampleRate
         return audioList.at(row).info.sampleRate;
-    case Qt::UserRole+7: //sampleBit
+    case Qt::UserRole+8: //sampleBit
         return audioList.at(row).info.sampleBit;
-    case Qt::UserRole+8: //bitRate
+    case Qt::UserRole+9: //bitRate
         return audioList.at(row).info.bitRate;
-    case Qt::UserRole+9: //duration
+    case Qt::UserRole+10: //duration
         return audioList.at(row).info.duration;
     default:break;
     }
@@ -72,13 +74,14 @@ QHash<int, QByteArray> EasyModel::roleNames() const
         { Qt::UserRole+0, "filepath" }
         ,{ Qt::UserRole+1, "filename" }
         ,{ Qt::UserRole+2, "filesize" }
-        ,{ Qt::UserRole+3, "format" }
-        ,{ Qt::UserRole+4, "encode" }
-        ,{ Qt::UserRole+5, "channels" }
-        ,{ Qt::UserRole+6, "sampleRate" }
-        ,{ Qt::UserRole+7, "sampleBit" }
-        ,{ Qt::UserRole+8, "bitRate" }
-        ,{ Qt::UserRole+9, "duration" }
+        ,{ Qt::UserRole+3, "filemd5" }
+        ,{ Qt::UserRole+4, "format" }
+        ,{ Qt::UserRole+5, "encode" }
+        ,{ Qt::UserRole+6, "channels" }
+        ,{ Qt::UserRole+7, "sampleRate" }
+        ,{ Qt::UserRole+8, "sampleBit" }
+        ,{ Qt::UserRole+9, "bitRate" }
+        ,{ Qt::UserRole+10, "duration" }
     };
 }
 

@@ -20,7 +20,7 @@ ListView {
     clip: true
     spacing: 2
 
-    property int columnCount: 11
+    property int columnCount: 12
 
     model: easy_model
 
@@ -39,6 +39,10 @@ ListView {
             RowLabel{
                 width: control.width/columnCount
                 text: "filesize"
+            }
+            RowLabel{
+                width: control.width/columnCount
+                text: "filemd5"
             }
             RowLabel{
                 width: control.width/columnCount
@@ -88,6 +92,10 @@ ListView {
             RowLabel{
                 width: control.width/columnCount
                 text: model.filesize
+            }
+            RowLabel{
+                width: control.width/columnCount
+                text: model.filemd5
             }
             RowLabel{
                 width: control.width/columnCount

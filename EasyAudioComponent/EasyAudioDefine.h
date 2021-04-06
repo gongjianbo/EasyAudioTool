@@ -121,6 +121,8 @@ struct EasyAudioInfo
     QString filename;
     //文件大小:byte
     qint64 filesize;
+    //md5值
+    QString filemd5;
     //格式，如wav
     QString format;
     //编码，如pcm_s16

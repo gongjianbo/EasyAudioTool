@@ -82,6 +82,10 @@ private:
     //音频流index
     int audioStreamIndex = -1;
 
+    //暂存音频信息，便于重复读取
+    mutable bool hasInfoTemp = false;
+    mutable EasyAudioInfo infoTemp;
+
     friend class EasyFFmpegDecoder;
     Q_DISABLE_COPY_MOVE(EasyFFmpegContext)
 };

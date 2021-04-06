@@ -2,6 +2,7 @@
 
 #include <QFileInfo>
 #include <QFile>
+#include <QCryptographicHash>
 #include <QDebug>
 
 EasySilkContext::EasySilkContext(const QString &filepath)
@@ -26,6 +27,13 @@ EasyAudioInfo EasySilkContext::audioInfo() const
     QFileInfo f_info(audiopath);
     info.filename = f_info.fileName();
     info.filesize = f_info.size();
+    QFile f_file(audiopath);
+    if(f_file.open(QIODevice::ReadOnly)){
+        QCryptographicHash q_hash(QCryptographicHash::Md5);
+        q_hash.addData(&f_file);
+        info.filemd5 = q_hash.result().toHex().toUpper();
+        f_file.close();
+    }
     if(!isValid())
         return info;
 
