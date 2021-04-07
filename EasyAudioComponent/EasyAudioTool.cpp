@@ -37,6 +37,16 @@ void EasyAudioTool::setCacheDir(const QString &dir)
     }
 }
 
+QList<QString> EasyAudioTool::urlsToStrs(const QList<QUrl> &urls)
+{
+    QList<QString> file_list;
+    for(const QUrl &dir : urls)
+    {
+        file_list.push_back(dir.toLocalFile());
+    }
+    return file_list;
+}
+
 void EasyAudioTool::setProcessing(bool on, int count)
 {
     if(onProcess != on){
@@ -152,12 +162,7 @@ void EasyAudioTool::parseUrlList(const QList<QUrl> &files,
                                  bool useFilter,
                                  const QStringList &filter)
 {
-    QList<QString> file_list;
-    for(const QUrl &dir : files)
-    {
-        file_list.push_back(dir.toLocalFile());
-    }
-    parsePathList(file_list,useFilter,filter);
+    parsePathList(urlsToStrs(files),useFilter,filter);
 }
 
 void EasyAudioTool::parseDirPath(const QDir &dir,
@@ -191,7 +196,7 @@ void EasyAudioTool::parseDirUrl(const QUrl &dir,
     parseDirPath(QDir(dir.toLocalFile()),useFilter,filter);
 }
 
-void EasyAudioTool::transcodePathList(const QList<QString> &files)
+void EasyAudioTool::transcodePathList(const QList<QString> &files, const QString &dstdir)
 {
     if(files.isEmpty() || !taskWatcher.isFinished()){
         qDebug()<<"tool transcodePathList start failed.";
@@ -203,9 +208,8 @@ void EasyAudioTool::transcodePathList(const QList<QString> &files)
 
     //待使用的变量
     QAudioFormat format = targetFormat;
-    const QString cache_dir = getCacheDir();
+    const QString cache_dir = dstdir.isEmpty()?getCacheDir():dstdir;
 
-    //因为解析的速度比较快，所以暂时不emit进度值，除非文件数较多
     QFuture<void> future = QtConcurrent::run(&taskPool,[=]{
         //解析失败的列表
         QStringList failed_list;
@@ -234,9 +238,11 @@ void EasyAudioTool::transcodePathList(const QList<QString> &files)
             }else{
                 failed_list.push_back(filepath);
             }
+            //目前没有break、continue等跳过，只放一处即可
+            setProcessProgress(file_count,success_count,fail_count);
         }
 
-        setProcessProgress(file_count,success_count,fail_count);
+        //setProcessProgress(file_count,success_count,fail_count);
         if(getProcessing()){
             if(!failed_list.isEmpty())
                 emit parseFailedChanged(failed_list);
@@ -247,14 +253,9 @@ void EasyAudioTool::transcodePathList(const QList<QString> &files)
     taskWatcher.setFuture(future);
 }
 
-void EasyAudioTool::transcodeUrlList(const QList<QUrl> &files)
+void EasyAudioTool::transcodeUrlList(const QList<QUrl> &files, const QString &dstdir)
 {
-    QList<QString> file_list;
-    for(const QUrl &dir : files)
-    {
-        file_list.push_back(dir.toLocalFile());
-    }
-    transcodePathList(file_list);
+    transcodePathList(urlsToStrs(files),dstdir);
 }
 
 EasyAudioInfo EasyAudioTool::transcodeFile(const QString &srcpath,
@@ -262,7 +263,7 @@ EasyAudioInfo EasyAudioTool::transcodeFile(const QString &srcpath,
                                            const QAudioFormat &format)
 {
     EasyAudioInfo info;
-    info.filepath=dstpath;
+    info.filepath = dstpath;
     info.valid = false;
 
     //TODO 目前encode类未完成，所以只能转为wav-pcm格式的文件
@@ -284,10 +285,12 @@ EasyAudioInfo EasyAudioTool::transcodeFile(const QString &srcpath,
         qDebug()<<"transcode parse error. ";
         return info;
     }
+    //存转换结果
+    bool trans_result = false;
+    QFile write_file(dstpath);
     //转pcm回调
     QByteArray pcm_temp;
     unsigned int size_count = 0;
-    QFile write_file(dstpath);
     std::function<bool(const char*,int)> call_back = [&](const char* pcmData,int pcmSize)
     {
         //每次只写一点速度比较慢
@@ -300,9 +303,8 @@ EasyAudioInfo EasyAudioTool::transcodeFile(const QString &srcpath,
         }
         return true;
     };
-    //存转换结果
-    bool trans_result = false;
-    if(write_file.open(QIODevice::WriteOnly)){
+    //writeonly时默认Truncate
+    if(write_file.open(QIODevice::WriteOnly | QIODevice::Truncate)){
         EasyWavHead head;
         //头占位
         write_file.write(QByteArray((char*)&head,sizeof(EasyWavHead)));
@@ -344,6 +346,133 @@ EasyAudioInfo EasyAudioTool::transcodeFile(const QString &srcpath,
     return info;
 }
 
+void EasyAudioTool::stitchPathList(const QList<QString> &files, const QString &dstpath)
+{
+    if(files.isEmpty() || !taskWatcher.isFinished()){
+        qDebug()<<"tool stitchPathList start failed.";
+        return;
+    }
+
+    setProcessing(true,files.count());
+    setProcessProgress(files.count(),0,0);
+
+    //待使用的变量
+    QAudioFormat format = targetFormat;
+    const QString outpath = dstpath.isEmpty()
+            ?QString("%1/stitch.%2").arg(getCacheDir()).arg(format.codec())
+           :dstpath;
+
+    QFuture<void> future = QtConcurrent::run(&taskPool,[=]{
+        EasyAudioInfo info;
+        info.filepath = outpath;
+        info.valid = false;
+        QFileInfo outinfo(outpath);
+        //原文件不存在
+        //目标目录不存在或者未生成
+        if(!(outinfo.dir().exists() || outinfo.dir().mkpath(outinfo.absolutePath()))){
+            qDebug()<<"stitch path error."<<outpath;
+            emit stitchFinished(info);
+            setProcessing(false,-1);
+            return;
+        }
+        //拼接结果
+        bool stitch_result = false;
+        QFile write_file(outpath);
+        //转pcm回调
+        QByteArray pcm_temp;
+        unsigned int size_count = 0;
+        std::function<bool(const char*,int)> call_back = [&](const char* pcmData,int pcmSize)
+        {
+            //每次只写一点速度比较慢
+            pcm_temp.append(pcmData,pcmSize);
+            size_count += pcmSize;
+            //每次写10M
+            if(pcm_temp.count() > 1024*1024*10){
+                write_file.write(pcm_temp);
+                pcm_temp.clear();
+            }
+            return true;
+        };
+        //writeonly时默认Truncate
+        if(write_file.open(QIODevice::WriteOnly | QIODevice::Truncate)){
+            //计数
+            int file_count = files.count();
+            int success_count = 0;
+            int fail_count = 0;
+            EasyWavHead head;
+            //头占位
+            write_file.write(QByteArray((char*)&head,sizeof(EasyWavHead)));
+
+            stitch_result = true;
+            for(int index=0; index<files.count(); index++)
+            {
+                //stitch_result放这里break，就只写一个progress
+                if(!getProcessing() || !stitch_result){
+                    stitch_result = false;
+                    break;
+                }
+                const QString &filepath = files.at(index);
+                QSharedPointer<EasyAbstractDecoder> p_decoder = EasyAudioFactory::createDecoder(filepath);
+                if(!p_decoder || !p_decoder->isValid() || !p_decoder->open(format)){
+                    qDebug()<<"stitch parse error. ";
+                    stitch_result = false;
+                }else{
+                    p_decoder->readAll(call_back);
+                    p_decoder->close();
+                }
+
+                //转换成功的就emit除去
+                if(stitch_result){
+                    success_count++;
+                }else{
+                    //任一个失败则整体失败
+                    fail_count++;
+                }
+                //目前没有break、continue等跳过，只放一处即可
+                setProcessProgress(file_count,success_count,fail_count);
+            }
+
+            //没转出数据说明失败了
+            if(size_count<1)
+                stitch_result = false;
+            if(stitch_result){
+                //尾巴上那点写文件
+                write_file.write(pcm_temp);
+                //头覆盖
+                write_file.seek(0);
+                head = EasyWavHead::createHead(format,size_count);
+                write_file.write(QByteArray((char*)&head,sizeof(EasyWavHead)));
+                write_file.close();
+                //信息的文件信息
+                QSharedPointer<EasyAbstractContext> p_context = EasyAudioFactory::createContext(dstpath);
+                if(p_context && p_context->isValid()){
+                    info = p_context->audioInfo();
+                    stitch_result = info.valid;
+                }
+            }else{
+                write_file.close();
+            }
+        }
+        //无效的就移除该文件
+        if(!stitch_result){
+            write_file.remove();
+        }
+
+        //setProcessProgress(file_count,success_count,fail_count);
+        if(getProcessing()){
+            emit stitchFinished(info);
+        }
+        //process=false表示人为终止
+        setProcessing(false,stitch_result?1:-1);
+    });
+    taskWatcher.setFuture(future);
+}
+
+void EasyAudioTool::stitchUrlList(const QList<QUrl> &files, const QString &dstpath)
+{
+    stitchPathList(urlsToStrs(files),dstpath);
+}
+
 void EasyAudioTool::stop()
 {
     onProcess = false;
@@ -355,7 +484,7 @@ void EasyAudioTool::setTargetFormat(int channels, int sampleRate, int sampleBit,
     targetFormat.setSampleRate(sampleRate);
     //TODO sampleBit待定，可能需要定义一个枚举值
     {
-        targetFormat.setSampleSize(16);
+        targetFormat.setSampleSize(16); sampleBit;
         targetFormat.setSampleType(QAudioFormat::SignedInt);
     }
     //TODO codec目前只支持转为wav-pcm

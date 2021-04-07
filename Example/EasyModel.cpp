@@ -112,6 +112,19 @@ void EasyModel::transcodeAll()
     }
 }
 
+void EasyModel::stitchAll()
+{
+    QList<QString> file_list;
+    for(const ModelItem &item:audioList)
+    {
+        file_list.push_back(item.info.filepath);
+    }
+    if(!file_list.isEmpty()){
+        audioTool.setTargetFormat(1,16000,16,"wav");
+        audioTool.stitchPathList(file_list);
+    }
+}
+
 void EasyModel::clearAudio()
 {
     beginResetModel();

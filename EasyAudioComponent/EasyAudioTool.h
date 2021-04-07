@@ -46,6 +46,9 @@ public:
     int getProcessFail() const { return processFail; }
 
 private:
+    //QList<QUrl>转为QList<QString>
+    //QUrl.toLocalFile()获取路径
+    QList<QString> urlsToStrs(const QList<QUrl> &urls);
     //设置处理状态
     //on为处理启停，start时count为处理数，finished时count>0=true成功
     void setProcessing(bool on, int count);
@@ -76,6 +79,10 @@ signals:
     void transcodeFinished(const EasyAudioInfo &info);
     //转码失败的文件列表
     void transcodeFailedChanged(const QStringList &files);
+    //【】拼接
+    //返回拼接结果，只要一个处理失败则无效
+    //根据info.valid判断结果有效性
+    void stitchFinished(const EasyAudioInfo &info);
 
 public slots:
     //【】解析
@@ -105,13 +112,25 @@ public slots:
     //转码多个文件，转码后存放到缓存文件夹然后emit路径出去
     //（转码一般用提取完信息的文件，所以这列没加过滤参数）
     //files: 文件列表
-    void transcodePathList(const QList<QString> &files);
+    //dstdir: 生成后的保存目录，empty则放到cacheDir
+    void transcodePathList(const QList<QString> &files,
+                           const QString &dstdir = QString());
     //QtQuick.Dialogs使用的url存储路径
-    void transcodeUrlList(const QList<QUrl> &files);
+    void transcodeUrlList(const QList<QUrl> &files,
+                          const QString &dstdir = QString());
     //单个文件转换编码，非线程
     EasyAudioInfo transcodeFile(const QString &srcpath,
                                 const QString &dstpath,
                                 const QAudioFormat &format);
+    //【】拼接
+    //将多个文件转为指定格式并按顺序拼接
+    //files: 文件列表
+    //dstpath: 生成的路径
+    void stitchPathList(const QList<QString> &files,
+                        const QString &dstpath = QString());
+    //QtQuick.Dialogs使用的url存储路径
+    void stitchUrlList(const QList<QUrl> &files,
+                       const QString &dstpath = QString());
     //【】停止操作
     //目前只是把标志位=false，处理逻辑去判断
     void stop();

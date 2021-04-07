@@ -190,6 +190,13 @@ ListView {
                 }
             }
 
+            Button{
+                text: "stitch"
+                onClicked: {
+                    easy_model.stitchAll();
+                }
+            }
+
             RowLabel{
                 text: easy_model.tool.cacheDir
                 anchors.verticalCenter: parent.verticalCenter

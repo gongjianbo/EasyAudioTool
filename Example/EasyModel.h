@@ -31,6 +31,8 @@ public slots:
     void parseDir(const QString &filedir, const QStringList &filter = QStringList());
     //转码
     void transcodeAll();
+    //拼接
+    void stitchAll();
     //model item增删
     void clearAudio();
     void appendAudio(const ModelItem &data);
