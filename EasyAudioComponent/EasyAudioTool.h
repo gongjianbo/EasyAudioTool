@@ -105,9 +105,6 @@ public slots:
     //转码多个文件，转码后存放到缓存文件夹然后emit路径出去
     //（转码一般用提取完信息的文件，所以这列没加过滤参数）
     //files: 文件列表
-    //channels: 目标格式通道数
-    //sampleRate: 目标格式采样率
-    //sampleBit: 目标格式采样存储类型枚举，暂未定义
     void transcodePathList(const QList<QString> &files);
     //QtQuick.Dialogs使用的url存储路径
     void transcodeUrlList(const QList<QUrl> &files);
@@ -119,6 +116,10 @@ public slots:
     //目前只是把标志位=false，处理逻辑去判断
     void stop();
     //【】设置转码后的目标格式
+    //channels: 目标格式通道数
+    //sampleRate: 目标格式采样率
+    //sampleBit: 目标格式采样存储类型枚举，暂未定义
+    //codec: 目标格式编码，暂固定为-wav
     void setTargetFormat(int channels, int sampleRate, int sampleBit, const QString &codec);
 
 private:

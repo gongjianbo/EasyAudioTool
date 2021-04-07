@@ -229,6 +229,8 @@ void EasyAudioTool::transcodePathList(const QList<QString> &files)
             //转换成功的就emit除去
             if(info.valid){
                 transcodeFinished(info);
+                fail_count--;
+                success_count++;
             }else{
                 failed_list.push_back(filepath);
             }
@@ -260,6 +262,7 @@ EasyAudioInfo EasyAudioTool::transcodeFile(const QString &srcpath,
                                            const QAudioFormat &format)
 {
     EasyAudioInfo info;
+    info.filepath=dstpath;
     info.valid = false;
 
     //TODO 目前encode类未完成，所以只能转为wav-pcm格式的文件
@@ -271,49 +274,72 @@ EasyAudioInfo EasyAudioTool::transcodeFile(const QString &srcpath,
     //原文件不存在
     //目标目录不存在或者未生成
     if(!src_info.exists() || !(dst_info.dir().exists() || dst_info.dir().mkpath(dst_info.absolutePath()))){
-        qDebug()<<"transcode file error."<<src_info<<dst_info;
+        qDebug()<<"transcode path error."<<src_info<<dst_info;
         return info;
     }
 
-    //
-    /*bool trans_result = false;
-    EasyWavHead head;
-    QFile dst_file(dstpath);
-    if(dst_file.open(QIODevice::WriteOnly)){
-        //先写头，再写数据，再seek0覆盖头
-        dst_file.write((const char *)&head,sizeof(EasyWavHead));
-        //缓存pcm数据，达到一定size再写入文件
-        QByteArray pcm_temp;
-        //数据总大小
-        unsigned int size_count=0;
-
-        //解码为pcm
-        QSharedPointer<EasyAbstractDecoder> p_decoder = EasyAudioFactory::createDecoder(srcpath);
-        if(p_decoder && p_decoder->isValid() && p_decoder->open(format)){
-            //EasyAudioInfo info = p_context->audioInfo();
-            //while(p_decoder->read())
-            p_decoder->close();
+    //解码开始
+    QSharedPointer<EasyAbstractDecoder> p_decoder = EasyAudioFactory::createDecoder(srcpath);
+    if(!p_decoder || !p_decoder->isValid() || !p_decoder->open(format)){
+        qDebug()<<"transcode parse error. ";
+        return info;
+    }
+    //转pcm回调
+    QByteArray pcm_temp;
+    unsigned int size_count = 0;
+    QFile write_file(dstpath);
+    std::function<bool(const char*,int)> call_back = [&](const char* pcmData,int pcmSize)
+    {
+        //每次只写一点速度比较慢
+        pcm_temp.append(pcmData,pcmSize);
+        size_count += pcmSize;
+        //每次写10M
+        if(pcm_temp.count() > 1024*1024*10){
+            write_file.write(pcm_temp);
+            pcm_temp.clear();
         }
-        //如果转出的文件长度为0，判断为失败
-        trans_result &= bool(size_count>0);
-
+        return true;
+    };
+    //存转换结果
+    bool trans_result = false;
+    if(write_file.open(QIODevice::WriteOnly)){
+        EasyWavHead head;
+        //头占位
+        write_file.write(QByteArray((char*)&head,sizeof(EasyWavHead)));
+        //数据
+        QByteArray test_temp = p_decoder->readAll(call_back);
+        if(!test_temp.isEmpty())
+            qDebug()<<"transcode readAll return not empty.";
+        //没转出数据说明失败了
+        trans_result = (size_count>0);
         if(trans_result){
             //尾巴上那点写文件
-            dst_file.write(pcm_temp);
+            write_file.write(pcm_temp);
+            //头覆盖
+            write_file.seek(0);
             head = EasyWavHead::createHead(format,size_count);
-            //覆盖头
-            dst_file.seek(0);
-            dst_file.write((const char *)&head,sizeof(EasyWavHead));
+            write_file.write(QByteArray((char*)&head,sizeof(EasyWavHead)));
+            //关闭，以便context打开
+            write_file.close();
+            //信息的文件信息
+            QSharedPointer<EasyAbstractContext> p_context = EasyAudioFactory::createContext(dstpath);
+            if(p_context && p_context->isValid()){
+                info = p_context->audioInfo();
+                trans_result = info.valid;
+            }
+        }else{
+            write_file.close();
         }
-
-        dst_file.close();
     }
+    //解码结束
+    p_decoder->close();
+
     //无效的转换就把那个文件删除
     if(!trans_result){
-        qDebug()<<"transcode file failed. remove file...";
-        dst_file.remove();
+        qDebug()<<"transcode write error. remove file.";
+        write_file.remove();
     }
-    info.valid = trans_result;*/
+    info.valid = trans_result;
 
     return info;
 }

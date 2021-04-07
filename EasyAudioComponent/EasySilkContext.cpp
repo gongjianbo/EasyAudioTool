@@ -120,6 +120,10 @@ bool EasySilkContext::toPcm(const QString &filepath,
     //Valid values are 8000,12000, 16000, 24000, 32000, 44100, and 48000.
     dec_ctrl.API_sampleRate = sampleRate;
     dec_ctrl.framesPerPacket = 1;
+    if(sampleRate<8000){
+        qDebug()<<"silk decode sampleRate error."<<sampleRate;
+        return false;
+    }
 
     //创建解码器
     SKP_int32 dec_size;

@@ -60,7 +60,7 @@ bool EasySilkDecoder::open(const QAudioFormat &format)
     dec_ctrl.API_sampleRate = format.sampleRate();
     dec_ctrl.framesPerPacket = 1;
     //默认就单声道16K
-    if(format.channelCount()!=1 || format.sampleSize()!=16){
+    if(format.channelCount()!=1 || format.sampleRate()<8000 || format.sampleSize()!=16){
         qDebug()<<"silk decode format ignore."<<format;
     }
 

@@ -26,8 +26,12 @@ public:
     EasyAudioTool *getTool() { return &audioTool; }
 
 public slots:
+    //获取文件信息
     void parseUrl(const QUrl &fileurl, const QStringList &filter = QStringList());
     void parseDir(const QString &filedir, const QStringList &filter = QStringList());
+    //转码
+    void transcodeAll();
+    //model item增删
     void clearAudio();
     void appendAudio(const ModelItem &data);
 

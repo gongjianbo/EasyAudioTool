@@ -5,6 +5,7 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QUrl>
+#include <QTimer>
 #include <QDebug>
 #include "EasyAudioFactory.h"
 
@@ -20,7 +21,9 @@ EasyModel::EasyModel(QObject *parent)
         item.info=info;
         appendAudio(item);
     });
-    parseDir(qApp->applicationDirPath()+"/audio");
+    QTimer::singleShot(1000,[this]{
+        parseDir(qApp->applicationDirPath()+"/audio");
+    });
 }
 
 int EasyModel::rowCount(const QModelIndex &parent) const
@@ -94,6 +97,19 @@ void EasyModel::parseDir(const QString &filedir, const QStringList &filter)
 {
     clearAudio();
     audioTool.parseDirPath(filedir,!filter.isEmpty(),filter);
+}
+
+void EasyModel::transcodeAll()
+{
+    QList<QString> file_list;
+    for(const ModelItem &item:audioList)
+    {
+        file_list.push_back(item.info.filepath);
+    }
+    if(!file_list.isEmpty()){
+        audioTool.setTargetFormat(1,16000,16,"wav");
+        audioTool.transcodePathList(file_list);
+    }
 }
 
 void EasyModel::clearAudio()

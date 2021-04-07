@@ -177,6 +177,23 @@ ListView {
                     easy_dilaog.open();
                 }
             }
+
+            RowLabel{
+                text: '["*.wav","*.mp3"]'
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            Button{
+                text: "transcode"
+                onClicked: {
+                    easy_model.transcodeAll();
+                }
+            }
+
+            RowLabel{
+                text: easy_model.tool.cacheDir
+                anchors.verticalCenter: parent.verticalCenter
+            }
         }
     }
 
