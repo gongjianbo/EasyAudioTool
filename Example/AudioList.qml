@@ -9,7 +9,7 @@ import Test 1.0
 ListView {
     id: control
 
-    EasyAudioPlayer{
+    SimpleAudioPlayer{
         id: easy_player
     }
 

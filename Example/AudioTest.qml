@@ -2,6 +2,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import Test 1.0
 
+//部分测试项
 Item {
     id: control
 

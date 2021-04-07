@@ -5,5 +5,6 @@
         <file>AudioTest.qml</file>
         <file>RowLabel.qml</file>
         <file>BusyDialog.qml</file>
+        <file>SimpleAudioPlayer.qml</file>
     </qresource>
 </RCC>
