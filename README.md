@@ -2,9 +2,11 @@
 Qt/QML Audio Component. 音频处理组件，用于转码、播放等。
 
 # 3rd-info
+下列为此项目携带的第三方库的信息，如有需要可替换为其他版本
+
 ### 1.silk：SILK_SDK_SRC_v1.0.9 
 
-使用 MSVC2019-64bit 编译
+使用 MSVC2017-64bit 编译
 
 官网被墙：https://developer.skype.com/silk/SILK_SDK_SRC_v1.0.9.zip 
 
