@@ -95,9 +95,9 @@ protected:
 
 private:
     //open状态
-    bool theOpened = false;
+    bool theOpened{ false };
     //转码结束
-    bool theEnded = true;
+    bool theEnded{ true };
 
     //Q_DISABLE_COPY_MOVE(EasyAbstractDecoder)
 };

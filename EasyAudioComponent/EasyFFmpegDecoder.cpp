@@ -40,7 +40,7 @@ bool EasyFFmpegDecoder::open(const QAudioFormat &format)
     resetOutBuffer(out_bufsize);
 
     packet = av_packet_alloc();
-    av_init_packet(packet);
+    //av_init_packet(packet); 接口已废弃
     frame = av_frame_alloc();
 
     //原数据格式参数

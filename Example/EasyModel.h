@@ -1,6 +1,4 @@
-#ifndef EASYMODEL_H
-#define EASYMODEL_H
-
+#pragma once
 #include <QAbstractListModel>
 #include "EasyAudioDefine.h"
 #include "EasyAudioTool.h"
@@ -41,5 +39,3 @@ private:
     QList<ModelItem> audioList;
     EasyAudioTool audioTool;
 };
-
-#endif // EASYMODEL_H

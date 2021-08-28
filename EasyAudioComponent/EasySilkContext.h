@@ -44,7 +44,7 @@ private:
     //音频源文件路径
     QString audiopath;
     //暂存音频信息，便于重复读取
-    mutable bool hasInfoTemp = false;
+    mutable bool hasInfoTemp{ false };
     mutable EasyAudioInfo infoTemp;
 
     friend class EasySilkDecoder;

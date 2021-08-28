@@ -10,15 +10,16 @@
  * 2.本类只处理编解码，不带多线程处理部分
  * 3.转换采用libswresample，该模块主要功能为采样率-声道-样本格式转换等
  *
+ * (2021-8-28移除了部分无效的地址)
  * 测试文件地址：
  * https://samples.mplayerhq.hu/A-codecs/
  * 音乐下载：
  * http://www.musictool.top/
+ * 音频读取参考：
+ * ffmpeg-4.2.4\doc\examples\filtering_audio.c
  * 重采样参考：
  * ffmpeg-4.2.4\doc\examples\resampling_audio.c
  * https://www.jianshu.com/p/bf5e54f553a4
- * https://segmentfault.com/a/1190000025145553
- * https://blog.csdn.net/bixinwei22/article/details/86545497
  * https://blog.csdn.net/zhuweigangzwg/article/details/53395009
  */
 class EasyFFmpegDecoder final : public EasyAbstractDecoder
@@ -65,17 +66,17 @@ private:
     //下面这些本来在解码函数中，现在拿出来配合解析流
     //描述存储压缩数据
     //视频通常包含一个压缩帧，音频可能包含多个压缩帧
-    AVPacket *packet = NULL;
+    AVPacket *packet{ NULL };
     //描述原始数据
-    AVFrame *frame = NULL;
+    AVFrame *frame{ NULL };
     //重采样上下文
-    SwrContext *swr_ctx = NULL;
+    SwrContext *swr_ctx{ NULL };
     //解析时out缓冲，单个通道初始1M+大小
-    int out_bufsize = 1024*1024*2;
+    int out_bufsize{ 1024*1024*2 };
     //out_buffer为缓冲区
-    uint8_t *out_buffer = NULL;
+    uint8_t *out_buffer{ NULL };
     //out_buffer_arr保存了out_buffer和out_buffer+len/2两个地址
     //用于双声道数据获取参数
-    uint8_t *out_buffer_arr[2] = { NULL, NULL};
+    uint8_t *out_buffer_arr[2]{ NULL, NULL};
 };
 

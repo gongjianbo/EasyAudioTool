@@ -44,11 +44,11 @@ public:
 
 private:
     //这些变量是从示例拿的
-    static constexpr int MAX_BYTES_PER_FRAME = 1024;
-    static constexpr int MAX_INPUT_FRAMES = 5;
-    static constexpr int MAX_FRAME_LENGTH = 480;
-    static constexpr int FRAME_LENGTH_MS = 20;
-    static constexpr int MAX_API_FS_KHZ = 48;
+    static constexpr int MAX_BYTES_PER_FRAME{ 1024 };
+    static constexpr int MAX_INPUT_FRAMES{ 5 };
+    static constexpr int MAX_FRAME_LENGTH{ 480 };
+    static constexpr int FRAME_LENGTH_MS{ 20 };
+    static constexpr int MAX_API_FS_KHZ{ 48 };
 
     QSharedPointer<EasySilkContext> theContextPtr;
     //文件
@@ -63,8 +63,8 @@ private:
     QVector<SKP_uint8> dec_state;
     //默认解出来貌似是16bit的精度
     SKP_uint8 payload[MAX_BYTES_PER_FRAME * MAX_INPUT_FRAMES];
-    SKP_uint8 *payload_ptr = NULL;
+    SKP_uint8 *payload_ptr{ NULL };
     SKP_int16 out[((FRAME_LENGTH_MS * MAX_API_FS_KHZ) << 1) * MAX_INPUT_FRAMES];
-    SKP_int16 *out_ptr = NULL;
+    SKP_int16 *out_ptr{ NULL };
 };
 

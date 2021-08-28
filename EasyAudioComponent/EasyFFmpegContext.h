@@ -74,16 +74,16 @@ private:
     QString audiopath;
 
     //格式化I/O上下文
-    AVFormatContext *formatCtx = NULL;
+    AVFormatContext *formatCtx{ NULL };
     //解码器
-    AVCodec *codec = NULL;
+    AVCodec *codec{ NULL };
     //解码器上下文
-    AVCodecContext *codecCtx = NULL;
+    AVCodecContext *codecCtx{ NULL };
     //音频流index
-    int audioStreamIndex = -1;
+    int audioStreamIndex{ -1 };
 
     //暂存音频信息，便于重复读取
-    mutable bool hasInfoTemp = false;
+    mutable bool hasInfoTemp{ false };
     mutable EasyAudioInfo infoTemp;
 
     friend class EasyFFmpegDecoder;

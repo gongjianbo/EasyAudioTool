@@ -61,16 +61,16 @@ private:
     QByteArray audioData;
     //data[0]偏移相对于writeCount的偏移
     //（appendData累积到一定大小会移除前面的数据，被移除的就作为偏移取值readCount-audioOffset）
-    qint64 audioOffset = 0;
+    qint64 audioOffset{ 0 };
     //readData累计
-    qint64 readCount = 0;
+    qint64 readCount{ 0 };
     //writeData累计
-    qint64 writeCount = 0;
+    qint64 writeCount{ 0 };
 
     //是否数据写入完毕（由外部设置）
     //(边解析边播放需要)
-    bool writeEnd = false;
+    bool writeEnd{ false };
     //readData读完后还会触发多次
     //增加一个标记避免重复触发
-    bool readEnd = false;
+    bool readEnd{ false };
 };

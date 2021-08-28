@@ -153,13 +153,13 @@ private:
     QFutureWatcher<void> taskWatcher;
     //处理状态，正在执行任务则为true
     //用于判断终止操作
-    std::atomic_bool onProcess = false;
+    std::atomic_bool onProcess{ false };
     //待处理文件数
-    std::atomic_int processCount = 0;
+    std::atomic_int processCount{ 0 };
     //处理成功数
-    std::atomic_int processSuccess = 0;
+    std::atomic_int processSuccess{ 0 };
     //处理失败数
-    std::atomic_int processFail = 0;
+    std::atomic_int processFail{ 0 };
 
     //转码后的目标格式
     //主要设置channels、sampleRate、sampleBit、codec

@@ -64,12 +64,12 @@ private:
     //音频文件路径
     QString audiopath;
     //播放状态
-    EasyAudio::PlayerState playerState = EasyAudio::Stopped;
+    EasyAudio::PlayerState playerState{ EasyAudio::Stopped };
     //播放时间进度 ms
-    qint64 position = 0;
+    qint64 position{ 0 };
 
     //实际播放加载内容作为单例
-    EasyPlayerCore *core = nullptr;
+    EasyPlayerCore *core{ nullptr };
     //用于判断当前组件唯一性，只有路径在多级列表会联动
     //QString target;
 };

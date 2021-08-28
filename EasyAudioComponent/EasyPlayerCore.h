@@ -53,16 +53,16 @@ private:
     //播放参数
     QAudioFormat audioFormat;
     //播放
-    QAudioOutput *audioOutput = nullptr;
+    QAudioOutput *audioOutput{ nullptr };
     //存放音频数据
     EasyPlayerBuffer audioBuffer;
     //解码器
     QSharedPointer<EasyAbstractDecoder> audioDecoder;
 
     //播放状态
-    EasyAudio::PlayerState playerState = EasyAudio::Stopped;
+    EasyAudio::PlayerState playerState{ EasyAudio::Stopped };
     //播放时间进度 ms
-    qint64 position = 0;
+    qint64 position{ 0 };
     //延时关闭
     QTimer stopTimer;
 
