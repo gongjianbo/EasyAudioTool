@@ -3,7 +3,8 @@ QT += gui
 QT += multimedia
 QT += concurrent
 
-CONFIG += c++11 utf8_source
+CONFIG += c++11
+CONFIG += utf8_source
 
 HEADERS += \
     $$PWD/EasyAudioDefine.h \

@@ -6,7 +6,9 @@ QT += gui
 QT += widgets
 QT += quick
 
-CONFIG += c++11 utf8_source
+CONFIG += c++11
+CONFIG += utf8_source
+
 DESTDIR += $$PWD/bin
 
 QMAKE_CFLAGS_WARN_ON = /W3

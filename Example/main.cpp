@@ -23,6 +23,7 @@ VldLog vld_log;
 int main(int argc, char *argv[])
 {
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    //其实QtQuick.Dialogs对话框直接设置settings目录后就不需要设置Organization了
     QCoreApplication::setOrganizationName("EasyAudio");
     QCoreApplication::setOrganizationDomain("https://blog.csdn.net/gongjianbo1992");
     QCoreApplication::setApplicationName("EasyAudio");
@@ -31,6 +32,8 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
 
+    //注册qml组件
+    //下个版本将生成为库，而不是直接导入源文件
     EasyAudioRegister::registerQmlType(&engine);
     EasyAudioRegister::registerMetaType();
     qmlRegisterType<EasyTest>("Test",1,0,"EasyTest");
