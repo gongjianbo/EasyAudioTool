@@ -8,15 +8,15 @@ QT += sql
 QT += network
 QT += concurrent
 
-CONFIG += c++11
-CONFIG += utf8_source
-
-INCLUDEPATH += $$PWD/../EasyAudioTool
-DEPENDPATH += $$PWD/../EasyAudioTool
-
+include($$PWD/../ProCommon.pri)
+#output dir
+#CONFIG(debug, debug|release) { }
 DESTDIR = $$PWD/../bin
 LIBS += $$PWD/../bin/EasyAudioTool.lib
 PRE_TARGETDEPS += $$PWD/../bin/EasyAudioTool.lib
+
+INCLUDEPATH += $$PWD/../EasyAudioTool
+DEPENDPATH += $$PWD/../EasyAudioTool
 
 SOURCES += \
         main.cpp

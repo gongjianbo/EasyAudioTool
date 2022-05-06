@@ -1,13 +1,17 @@
+QT += quick
+QT += qml
 QT += core
 QT += gui
+QT += widgets
 QT += multimedia
 QT += concurrent
 
-CONFIG += c++11
-CONFIG += utf8_source
-
 TEMPLATE = lib
-CONFIG += staticlib
+DEFINES += EASYAUDIOTOOL_LIBRARY
+#CONFIG += staticlib
+include($$PWD/../ProCommon.pri)
+#output dir
+#CONFIG(debug, debug|release) { }
 DESTDIR = $$PWD/../bin
 
 greaterThan(QT_MAJOR_VERSION, 4) {
@@ -30,7 +34,26 @@ DEPENDPATH += $$PWD/../3rd/silksdk/include
 }
 
 HEADERS += \
-    EasyAuidoTool.h
+    EasyAudioCommon.h \
+    EasyAudioFactory.h \
+    EasyAudioInterface.h \
+    EasyAudioPlayer.h \
+    EasyAudioRegister.h \
+    EasyFFmpegContext.h \
+    EasyFFmpegDecoder.h \
+    EasyPlayerBuffer.h \
+    EasyPlayerCore.h \
+    EasySilkContext.h \
+    EasySilkDecoder.h
 
 SOURCES += \
-    EasyAuidoTool.cpp
+    EasyAudioCommon.cpp \
+    EasyAudioFactory.cpp \
+    EasyAudioInterface.cpp \
+    EasyAudioPlayer.cpp \
+    EasyFFmpegContext.cpp \
+    EasyFFmpegDecoder.cpp \
+    EasyPlayerBuffer.cpp \
+    EasyPlayerCore.cpp \
+    EasySilkContext.cpp \
+    EasySilkDecoder.cpp
