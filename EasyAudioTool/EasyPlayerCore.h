@@ -35,8 +35,10 @@ public:
 
     //播放
     void play(const QString &filepath);
-    //暂停/恢复
-    void pause();
+    //暂停
+    void suspend();
+    //暂停后恢复播放
+    void resume();
     //停止
     void stop();
 
@@ -45,6 +47,8 @@ protected:
     void doPlay();
 
 signals:
+    //通知别的player断开信号槽链接
+    void playerItemChanged();
     void playerStateChanged(EasyAudio::PlayerState state);
     void positionChanged(qint64 position);
 

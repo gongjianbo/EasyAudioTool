@@ -55,6 +55,7 @@ void EasyPlayerCore::setPosition(qint64 pos)
 
 void EasyPlayerCore::play(const QString &filepath)
 {
+    qDebug()<<__FUNCTION__<<filepath;
     setPosition(0);
     stopTimer.stop();
     audioBuffer.resetBuffer();
@@ -73,35 +74,40 @@ void EasyPlayerCore::play(const QString &filepath)
     doPlay();
 }
 
-void EasyPlayerCore::pause()
+void EasyPlayerCore::suspend()
 {
-    //切换播放和暂停状态
-    if(audioOutput){
-        if(getPlayerState()==EasyAudio::Paused){
-            audioOutput->resume();
-            setPlayerState(EasyAudio::Playing);
-        }else if(getPlayerState()==EasyAudio::Playing){
-            audioOutput->suspend();
-            setPlayerState(EasyAudio::Paused);
-        }
+    if(!audioOutput){
+        return;
+    }
+    if(getPlayerState()==EasyAudio::Playing){
+        audioOutput->suspend();
+        setPlayerState(EasyAudio::Paused);
+    }
+}
+
+void EasyPlayerCore::resume()
+{
+    if(!audioOutput){
+        return;
+    }
+    if(getPlayerState()==EasyAudio::Paused){
+        audioOutput->resume();
+        setPlayerState(EasyAudio::Playing);
     }
 }
 
 void EasyPlayerCore::stop()
 {
-    //多个Player初始化的时候会多次调用，
-    //但是audioOutput还没初始化没啥影响
-    //if(getPlayerState()==(int)SimpleAudioPlayer::Stop)
-    //    return;
-    setPosition(0);
-    if(audioOutput){
-        audioOutput->stop();
-        if(audioDecoder&&audioDecoder->isOpen()){
-            audioDecoder->close();
-            audioDecoder.clear();
-        }
-        setPlayerState(EasyAudio::Stopped);
+    if(!audioOutput){
+        return;
     }
+    audioOutput->stop();
+    if(audioDecoder&&audioDecoder->isOpen()){
+        audioDecoder->close();
+        audioDecoder.clear();
+    }
+    setPosition(0);
+    setPlayerState(EasyAudio::Stopped);
 }
 
 void EasyPlayerCore::doPlay()

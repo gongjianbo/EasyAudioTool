@@ -9,24 +9,60 @@ Window {
     height: 500
     visible: true
 
-    EasyAudioPlayer {
-        id: player
-    }
-
-    //测试流程
-    Column {
-        anchors.centerIn: parent
+    ListView {
+        anchors.fill: parent
+        anchors.margins: 20
         spacing: 10
-        Text {
-            text: "path:"+player.filepath
-        }
-        Text {
-            text: "pos:"+player.position
-        }
-        Button {
-            text: "play"
-            onClicked: {
-                player.play('./audio/audio.mp3')
+
+        model: [
+            './audio/audio.flac',
+            './audio/audio.mp3',
+            './audio/audio.wav',
+            './audio/weixin.amr'
+        ]
+
+        delegate: Rectangle {
+            width: ListView.view.width
+            height: 40
+
+            EasyAudioPlayer {
+                id: player
+                filepath: modelData
+            }
+
+            //测试流程
+            Row {
+                anchors.centerIn: parent
+                spacing: 10
+                Text {
+                    width: 200
+                    elide: Text.ElideRight
+                    text: "path:"+player.filepath
+                }
+                Text {
+                    width: 150
+                    elide: Text.ElideRight
+                    text: "pos:"+player.position
+                }
+                Button {
+                    text: player.onPlaying ? "pause" : "play"
+                    onClicked: {
+                        if(player.onPlaying){
+                            //暂停播放
+                            player.pause();
+                        }else{
+                            //播放或者暂停后继续
+                            player.play();
+                        }
+                    }
+                }
+                Button {
+                    text: "stop"
+                    onClicked: {
+                        //停止
+                        player.stop();
+                    }
+                }
             }
         }
     }

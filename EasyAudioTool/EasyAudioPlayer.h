@@ -13,56 +13,64 @@
  * EasyPlayerCore进行播放，EasyAudioPlayer实例化后指向Core单例
  * @note
  * 1.之前继承自QQuickItem获取visibleChanged来自动关闭
- * 为了QML与Widgets共用，继承自QObject去掉UI关联性
- * QML可以封装一个QML Item来获取visibleChanged
+ *   为了QML与Widgets共用，继承自QObject去掉UI关联性
+ *   QML可以封装一个QML Item来获取visibleChanged
  * 2.目前需要保存当前播放列表的一些状态，暂时不作为QML单例
+ * 3.以前一个ListView多个音频共用了一个Player，导致更新进度和状态时每个Item都要判断是否是当前音频在更新
+ *   现在改为每个Item单独一个Player，切换Item播放时重新关联信号槽
+ * @history
+ * 2022-05-07 ListView多个Item共享Player变更为独立的Player
  */
 class EASYAUDIOTOOL_EXPORT EasyAudioPlayer : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString filepath READ getFilepath WRITE setFilepath NOTIFY filepathChanged)
-    Q_PROPERTY(EasyAudio::PlayerState playerState MEMBER playerState NOTIFY playerStateChanged)
+    Q_PROPERTY(EasyAudio::PlayerState playerState READ getPlayerState NOTIFY playerStateChanged)
     Q_PROPERTY(bool onPlaying READ getOnPlaying NOTIFY playerStateChanged)
     Q_PROPERTY(qint64 position READ getPosition NOTIFY positionChanged)
-    //Q_PROPERTY(QString target READ getTarget WRITE setTarget NOTIFY targetChanged)
 public:
     explicit EasyAudioPlayer(QObject *parent = nullptr);
     ~EasyAudioPlayer();
 
     //文件路径
-    QString getFilepath() const { return audiopath; }
+    QString getFilepath() const;
     void setFilepath(const QString &filepath);
 
     //播放状态
-    EasyAudio::PlayerState getPlayerState() const { return playerState; }
-    bool getOnPlaying() const { return (playerState==EasyAudio::Playing); }
+    EasyAudio::PlayerState getPlayerState() const;
     void setPlayerState(EasyAudio::PlayerState state);
+    bool getOnPlaying() const;
+    bool getIsStopped() const;
+    bool getIsPaused() const;
 
     //播放进度
-    qint64 getPosition() const { return position; }
+    qint64 getPosition() const;
     void setPosition(qint64 pos);
 
-    //用于判断当前播放组件
-    //QString getTarget() const { return target; }
-    //void setTarget(const QString &targetInfo);
-
 public slots:
-    //播放
-    void play(const QString &filepath = QString());
-    //暂停/恢复
+    //切换core关联的player对象
+    void prepare();
+    //播放或者暂停后继续
+    void play();
+    //暂停
     void pause();
     //停止
     void stop();
+    //快进N ms
+    void forward(qint64 ms);
+    //快退N ms
+    void backward(qint64 ms);
+    //跳转到指定ms时间
+    void seek(qint64 ms);
 
 signals:
     void filepathChanged();
     void playerStateChanged();
     void positionChanged();
-    //void targetChanged();
 
 private:
     //音频文件路径
-    QString audiopath;
+    QString audioPath;
     //播放状态
     EasyAudio::PlayerState playerState{ EasyAudio::Stopped };
     //播放时间进度 ms
@@ -70,6 +78,4 @@ private:
 
     //实际播放加载内容作为单例
     EasyPlayerCore *core{ nullptr };
-    //用于判断当前组件唯一性，只有路径在多级列表会联动
-    //QString target;
 };
