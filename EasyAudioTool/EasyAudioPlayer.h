@@ -18,8 +18,10 @@
  * 2.目前需要保存当前播放列表的一些状态，暂时不作为QML单例
  * 3.以前一个ListView多个音频共用了一个Player，导致更新进度和状态时每个Item都要判断是否是当前音频在更新
  *   现在改为每个Item单独一个Player，切换Item播放时重新关联信号槽
+ *   但这时要考虑ListView Item离开范围被释放的问题
  * @history
  * 2022-05-07 ListView多个Item共享Player变更为独立的Player
+ * 2022-05-08 增加跳转播放
  */
 class EASYAUDIOTOOL_EXPORT EasyAudioPlayer : public QObject
 {
@@ -43,9 +45,12 @@ public:
     bool getIsStopped() const;
     bool getIsPaused() const;
 
-    //播放进度
+    //播放进度 ms
     qint64 getPosition() const;
     void setPosition(qint64 pos);
+
+    //获取音频时长
+    Q_INVOKABLE qint64 getDuration() const;
 
 public slots:
     //切换core关联的player对象
@@ -56,11 +61,12 @@ public slots:
     void pause();
     //停止
     void stop();
-    //快进N ms
+    //快进N ms，N>0
     void forward(qint64 ms);
-    //快退N ms
+    //快退N ms，N>0
     void backward(qint64 ms);
-    //跳转到指定ms时间
+    //跳转到指定ms时间，<0则为0
+    //TODO 大于总时长的情况未处理，只是继续播放会直接结束
     void seek(qint64 ms);
 
 signals:

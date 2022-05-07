@@ -29,12 +29,17 @@ public:
     EasyAudio::PlayerState getPlayerState() const { return playerState; }
     void setPlayerState(EasyAudio::PlayerState state);
 
-    //播放进度
+    //播放进度 ms
     qint64 getPosition() const { return position; }
     void setPosition(qint64 pos);
 
+    //音频时长 ms
+    static qint64 calcDuration(const QString &filepath);
+
     //播放
-    void play(const QString &filepath);
+    //filepath:音频文件路径
+    //ms:跳转到指定ms时间播放，<=0则不跳转
+    void play(const QString &filepath, qint64 ms = 0);
     //暂停
     void suspend();
     //暂停后恢复播放
@@ -68,6 +73,8 @@ private:
     EasyAudio::PlayerState playerState{ EasyAudio::Stopped };
     //播放时间进度 ms
     qint64 position{ 0 };
+    //播放起始时间 ms
+    qint64 playOffset{ 0 };
     //延时关闭
     QTimer stopTimer;
 

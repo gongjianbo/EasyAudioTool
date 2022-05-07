@@ -23,16 +23,28 @@ Window {
 
         delegate: Rectangle {
             width: ListView.view.width
-            height: 40
+            height: 70
+            radius: 4
+            border.color: "gray"
 
             EasyAudioPlayer {
                 id: player
                 filepath: modelData
+                property real duration: 0
+                Component.onCompleted: {
+                    player.duration = player.getDuration();
+                }
+                onPositionChanged: {
+                    if(!slider.pressed){
+                        slider.value = position;
+                    }
+                }
             }
 
             //测试流程
             Row {
-                anchors.centerIn: parent
+                x: 20
+                y: 10
                 spacing: 10
                 Text {
                     width: 200
@@ -40,9 +52,14 @@ Window {
                     text: "path:"+player.filepath
                 }
                 Text {
-                    width: 150
+                    width: 120
                     elide: Text.ElideRight
                     text: "pos:"+player.position
+                }
+                Text {
+                    width: 120
+                    elide: Text.ElideRight
+                    text: "len:"+player.duration
                 }
                 Button {
                     text: player.onPlaying ? "pause" : "play"
@@ -61,6 +78,23 @@ Window {
                     onClicked: {
                         //停止
                         player.stop();
+                    }
+                }
+            }
+
+            Slider {
+                id: slider
+                x: 20
+                width: 400
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 10
+                from: 0
+                to: player.duration
+                //value: player.position
+                onPressedChanged: {
+                    if(!pressed){
+                        //console.log('seek',value)
+                        player.seek(value)
                     }
                 }
             }

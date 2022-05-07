@@ -66,9 +66,13 @@ public:
     //format:转出参数
     //return false:表示无法转换
     virtual bool open(const QAudioFormat &format) = 0;
+    //跳转到指定位置
+    //ms:以open参数计算毫秒值对应的位置
+    //return false:表示无法跳转
+    virtual bool seek(qint64 ms) = 0;
     //重置读取位置到开始
     //return false:表示无法跳转
-    virtual bool reset() = 0;
+    bool reset();
     //转码数据，每次调用都从上一次读取的位置继续读，直到结束
     //outBuffer:转码后输出缓冲区
     //maxSize:期望返回的数据的最大长度

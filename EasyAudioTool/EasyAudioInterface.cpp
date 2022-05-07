@@ -34,6 +34,11 @@ void EasyAbstractContext::setLastError(const QString &info)
     qDebug()<<"easy audio context error:"<<info;
 }
 
+bool EasyAbstractDecoder::reset()
+{
+    return seek(0);
+}
+
 QByteArray EasyAbstractDecoder::read(qint64 maxSize)
 {
     QByteArray result;

@@ -86,16 +86,18 @@ bool EasyFFmpegDecoder::open(const QAudioFormat &format)
     //返回值：成功返回>=0
     if(av_seek_frame(theContextPtr->formatCtx,-1,0,AVSEEK_FLAG_ANY) < 0)
         return false;
-
+    if(theContextPtr->codecCtx){
+        avcodec_flush_buffers(theContextPtr->codecCtx);
+    }
     setOpen(true);
     return true;
 }
 
-bool EasyFFmpegDecoder::reset()
+bool EasyFFmpegDecoder::seek(qint64 ms)
 {
-    if(!isOpen() || atEnd() || !isValid())
+    if(!isOpen() || !isValid())
         return false;
-    //seek到起始处
+    //seek到指定位置
     //参数一: 上下文;
     //参数二: 流索引, 如果stream_index是-1，会选择一个默认流，时间戳会从以AV_TIME_BASE为单位向具体流的时间基自动转换。
     //参数三: 将要定位处的时间戳，time_base单位或者如果没有流是指定的就用av_time_base单位。
@@ -105,9 +107,15 @@ bool EasyFFmpegDecoder::reset()
     //AVSEEK_FLAG_ANY 是可以seek到任意帧，注意不一定是关键帧，因此使用时可能会导致花屏
     //AVSEEK_FLAG_FRAME 是基于帧数量快进
     //返回值：成功返回>=0
-    if(av_seek_frame(theContextPtr->formatCtx,-1,0,AVSEEK_FLAG_ANY)<0)
+    qint64 seek_time = 0;
+    if(ms>0){
+        seek_time = ms / 1000.0 * AV_TIME_BASE;
+    }
+    if(av_seek_frame(theContextPtr->formatCtx,-1,seek_time,AVSEEK_FLAG_ANY)<0)
         return false;
-
+    if(theContextPtr->codecCtx){
+        avcodec_flush_buffers(theContextPtr->codecCtx);
+    }
     dataTemp.clear();
     setEnd(false);
     return true;
@@ -122,8 +130,10 @@ qint64 EasyFFmpegDecoder::read(char *outBuffer, qint64 maxSize)
     //先判断缓存里的数据是否够了
     //TODO 缓冲区待优化
     if(dataTemp.size() >= maxSize){
-        //copy后从缓冲中移除该段数据
-        memcpy(outBuffer, dataTemp.constData(), maxSize);
+        //copy后从缓冲中移除该段数据，buffer可以为null空读
+        if(outBuffer){
+            memcpy(outBuffer, dataTemp.constData(), maxSize);
+        }
         dataTemp.remove(0,maxSize);
         return maxSize;
     }
@@ -192,8 +202,10 @@ qint64 EasyFFmpegDecoder::read(char *outBuffer, qint64 maxSize)
 
                 //数据达到maxSize就返回
                 if(dataTemp.size() >= maxSize){
-                    //copy后从缓冲中移除该段数据
-                    memcpy(outBuffer, dataTemp.constData(), maxSize);
+                    //copy后从缓冲中移除该段数据，buffer可以为null空读
+                    if(outBuffer){
+                        memcpy(outBuffer, dataTemp.constData(), maxSize);
+                    }
                     dataTemp.remove(0,maxSize);
 
                     av_packet_unref(packet);
@@ -209,8 +221,10 @@ qint64 EasyFFmpegDecoder::read(char *outBuffer, qint64 maxSize)
     int out_size = 0;
     if(dataTemp.size() > 0){
         out_size = dataTemp.size()>maxSize?maxSize:dataTemp.size();
-        //copy后从缓冲中移除该段数据
-        memcpy(outBuffer, dataTemp.constData(), out_size);
+        //copy后从缓冲中移除该段数据，buffer可以为null空读
+        if(outBuffer){
+            memcpy(outBuffer, dataTemp.constData(), out_size);
+        }
         dataTemp.remove(0,out_size);
     }
     return out_size;

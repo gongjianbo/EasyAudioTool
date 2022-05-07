@@ -53,10 +53,24 @@ void EasyPlayerCore::setPosition(qint64 pos)
     }
 }
 
-void EasyPlayerCore::play(const QString &filepath)
+qint64 EasyPlayerCore::calcDuration(const QString &filepath)
 {
-    qDebug()<<__FUNCTION__<<filepath;
-    setPosition(0);
+    QSharedPointer<EasyAbstractContext> context = EasyAudioFactory::createContext(filepath);
+    if(context && context->isValid()){
+        EasyAudioInfo info = context->audioInfo();
+        if(info.valid){
+            return info.duration;
+        }
+    }
+    return 0;
+}
+
+void EasyPlayerCore::play(const QString &filepath, qint64 ms)
+{
+    //qDebug()<<__FUNCTION__<<ms<<filepath;
+    //跳转这部分时间和播放的时间加起来作为当前播放位置
+    playOffset = ms;
+    setPosition(ms);
     stopTimer.stop();
     audioBuffer.resetBuffer();
     audioDecoder.clear();
@@ -68,6 +82,7 @@ void EasyPlayerCore::play(const QString &filepath)
     }
 
     if(!audioDecoder){
+        //TODO 给予错误提示的信号
         qDebug()<<"无法解析"<<filepath;
         return;
     }
@@ -112,7 +127,8 @@ void EasyPlayerCore::stop()
 
 void EasyPlayerCore::doPlay()
 {
-    //先判断设备和参数修改没，修改了就重新new
+    //先判断设备和参数修改没，变更了就重新new
+    //因为目前只用到了defaultOutputDevice，所以只需要判断defaultOutputDevice信息
     const QAudioDeviceInfo cur_default = QAudioDeviceInfo::defaultOutputDevice();
     if(audioDevice != cur_default){
         audioDevice = cur_default;
@@ -132,7 +148,7 @@ void EasyPlayerCore::doPlay()
             //const int sample_rate=audioFormat.sampleRate();
             //const int sample_byte=audioFormat.sampleSize()/8;
             //const int read_ms=audioBuffer.getReadCount()/(channels*sample_rate*sample_byte/1000); //N/(0+1)
-            const int play_ms = audioOutput->processedUSecs()/1000;
+            const int play_ms = playOffset+audioOutput->processedUSecs()/1000;
             setPosition(play_ms);
             //qDebug()<<play_ms<<audioBuffer.getReadCount()<<audioBuffer.getWriteCount()
             //       <<audioBuffer.isWriteEnd()<<audioDecoder->atEnd();
@@ -145,6 +161,11 @@ void EasyPlayerCore::doPlay()
             }
         });
         audioOutput->setNotifyInterval(350);
+    }
+
+    //跳转
+    if(getPosition()>0){
+        audioDecoder->seek(getPosition());
     }
 
     //每次读大约一分钟的数据

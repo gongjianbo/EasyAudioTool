@@ -28,9 +28,10 @@ public:
     //format:转出参数
     //return false:表示无法转换
     bool open(const QAudioFormat &format) override;
-    //重置读取位置到开始
+    //跳转到指定位置
+    //ms:以open参数计算毫秒值对应的位置
     //return false:表示无法跳转
-    bool reset() override;
+    bool seek(qint64 ms) override;
     //转码数据，每次调用都从上一次读取的位置继续读，直到结束
     //outBuffer:转码后输出缓冲区
     //maxSize:期望返回的数据的最大长度

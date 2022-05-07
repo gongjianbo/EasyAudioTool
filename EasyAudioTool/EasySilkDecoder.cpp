@@ -87,15 +87,27 @@ bool EasySilkDecoder::open(const QAudioFormat &format)
     return true;
 }
 
-bool EasySilkDecoder::reset()
+bool EasySilkDecoder::seek(qint64 ms)
 {
-    if(!isOpen() || atEnd() || !decodeFile.isOpen())
+    if(!isOpen() || !decodeFile.isOpen())
         return false;
     if(!decodeFile.seek(dataOffset))
         return false;
-
     dataTemp.clear();
     setEnd(false);
+    if(ms>0){
+        //需要读取的采样数据字节数，固定16bit单声道
+        qint64 need_read = decodeSampleRate * 2 * 1 / 1000.0 * ms;
+        //每次最多读10M
+        static const qint64 read_step = 1024*1024*10;
+        while(need_read>read_step){
+            read(nullptr, read_step);
+            need_read -= read_step;
+        }
+        if(need_read>0){
+            read(nullptr, need_read);
+        }
+    }
     return true;
 }
 
@@ -109,8 +121,10 @@ qint64 EasySilkDecoder::read(char *outBuffer, qint64 maxSize)
     //先判断缓存里的数据是否够了
     //TODO 缓冲区待优化
     if(dataTemp.size() >= maxSize){
-        //copy后从缓冲中移除该段数据
-        memcpy(outBuffer, dataTemp.constData(), maxSize);
+        //copy后从缓冲中移除该段数据，buffer可以为null空读
+        if(outBuffer){
+            memcpy(outBuffer, dataTemp.constData(), maxSize);
+        }
         dataTemp.remove(0,maxSize);
         return maxSize;
     }
@@ -166,8 +180,10 @@ qint64 EasySilkDecoder::read(char *outBuffer, qint64 maxSize)
         dataTemp.append((const char *)out,total_len*2);
         //数据达到maxSize就返回，否则直到读取完数据
         if(dataTemp.size() >= maxSize){
-            //copy后从缓冲中移除该段数据
-            memcpy(outBuffer, dataTemp.constData(), maxSize);
+            //copy后从缓冲中移除该段数据，buffer可以为null空读
+            if(outBuffer){
+                memcpy(outBuffer, dataTemp.constData(), maxSize);
+            }
             dataTemp.remove(0,maxSize);
             return maxSize;
         }
@@ -176,8 +192,10 @@ qint64 EasySilkDecoder::read(char *outBuffer, qint64 maxSize)
     int out_size = 0;
     if(dataTemp.size() > 0){
         out_size = dataTemp.size()>maxSize?maxSize:dataTemp.size();
-        //copy后从缓冲中移除该段数据
-        memcpy(outBuffer, dataTemp.constData(), out_size);
+        //copy后从缓冲中移除该段数据，buffer可以为null空读
+        if(outBuffer){
+            memcpy(outBuffer, dataTemp.constData(), out_size);
+        }
         dataTemp.remove(0,out_size);
     }
     return out_size;
