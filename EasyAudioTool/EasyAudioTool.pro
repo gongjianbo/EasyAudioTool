@@ -38,7 +38,7 @@ HEADERS += \
     EasyAudioFactory.h \
     EasyAudioInterface.h \
     EasyAudioPlayer.h \
-    EasyAudioRegister.h \
+    EasyAudioTool.h \
     EasyFFmpegContext.h \
     EasyFFmpegDecoder.h \
     EasyPlayerBuffer.h \
@@ -51,6 +51,7 @@ SOURCES += \
     EasyAudioFactory.cpp \
     EasyAudioInterface.cpp \
     EasyAudioPlayer.cpp \
+    EasyAudioTool.cpp \
     EasyFFmpegContext.cpp \
     EasyFFmpegDecoder.cpp \
     EasyPlayerBuffer.cpp \

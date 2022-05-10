@@ -19,7 +19,11 @@ INCLUDEPATH += $$PWD/../EasyAudioTool
 DEPENDPATH += $$PWD/../EasyAudioTool
 
 SOURCES += \
+        EasyTest.cpp \
         main.cpp
 
 RESOURCES += \
     qml.qrc
+
+HEADERS += \
+    EasyTest.h

@@ -296,8 +296,12 @@ qint64 EasyFFmpegDecoder::readAll(std::function<bool (const char *, qint64)> cal
                 //qDebug()<<"out"<<out_bufuse<<"sample"<<ret<<"channel"<<out_channels<<sample_bytes*out_samples;
                 if(out_bufuse > 0){
                     //调用回调函数把buf地址和数据字节长度传递出去
-                    if(!callBack((const char *)out_buffer, out_bufuse))
-                        break;
+                    if(!callBack((const char *)out_buffer, out_bufuse)){
+                        av_frame_unref(frame);
+                        av_packet_unref(packet);
+                        //异常情况返回-1
+                        return -1;
+                    }
                     all_size += out_bufuse;
                 }
 #if 0

@@ -257,8 +257,10 @@ qint64 EasySilkDecoder::readAll(std::function<bool (const char *, qint64)> callB
         } while (dec_ctrl.moreInternalDecoderFrames);
 
         //调用回调函数把buf地址和数据字节长度传递出去
-        if(!callBack((const char *)out, total_len*2))
-            break;
+        if(!callBack((const char *)out, total_len*2)){
+            //异常情况返回-1
+            return -1;
+        }
         all_size += total_len*2;
     }
 

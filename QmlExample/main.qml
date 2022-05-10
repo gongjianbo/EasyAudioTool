@@ -9,6 +9,10 @@ Window {
     height: 500
     visible: true
 
+    EasyTest {
+        id: easy_test
+    }
+
     ListView {
         anchors.fill: parent
         anchors.margins: 20
@@ -20,6 +24,35 @@ Window {
             './audio/audio.wav',
             './audio/weixin.amr'
         ]
+
+        header: Rectangle {
+            width: ListView.view.width
+            height: 70
+            radius: 4
+            border.color: "gray"
+
+            //测试转码
+            Row {
+                anchors.centerIn: parent
+                spacing: 10
+                TextField {
+                    id: path_edit
+                    selectByMouse: true
+                }
+                Button {
+                    text: "translate"
+                    onClicked: {
+                        easy_test.transcodeRun(path_edit.text);
+                    }
+                }
+                Button {
+                    text: "cancel"
+                    onClicked: {
+                        easy_test.transcodeCancel();
+                    }
+                }
+            }
+        }
 
         delegate: Rectangle {
             width: ListView.view.width
