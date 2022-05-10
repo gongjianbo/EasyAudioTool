@@ -81,7 +81,8 @@ public:
     //读取数据
     //maxSize:期望返回的数据的最大长度
     //数据无效或已读取完则返回空
-    QByteArray read(qint64 maxSize);
+    //note:防止和read char*接口匹配歧义，命名为readData
+    QByteArray readData(qint64 maxSize);
     //转码所有数据
     //考虑到解码不便于重入，所以独立于read实现
     //callBack:转换时的同步回调函数

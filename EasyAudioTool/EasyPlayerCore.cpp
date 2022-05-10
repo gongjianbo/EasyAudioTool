@@ -154,7 +154,7 @@ void EasyPlayerCore::doPlay()
             //       <<audioBuffer.isWriteEnd()<<audioDecoder->atEnd();
             if(audioBuffer.isWaitWrite() && audioDecoder && !audioDecoder->atEnd()){
                 //每次读大约一分钟的数据
-                audioBuffer.appendData(audioDecoder->read(EasyPlayerBuffer::getOnceLength()));
+                audioBuffer.appendData(audioDecoder->readData(EasyPlayerBuffer::getOnceLength()));
                 if(audioDecoder->atEnd()){
                     audioBuffer.setWriteEnd(true);
                 }
@@ -169,7 +169,7 @@ void EasyPlayerCore::doPlay()
     }
 
     //每次读大约一分钟的数据
-    audioBuffer.appendData(audioDecoder->read(EasyPlayerBuffer::getOnceLength()));
+    audioBuffer.appendData(audioDecoder->readData(EasyPlayerBuffer::getOnceLength()));
     if(audioDecoder->atEnd()){
         audioBuffer.setWriteEnd(true);
     }

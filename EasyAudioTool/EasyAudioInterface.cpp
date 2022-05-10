@@ -39,7 +39,7 @@ bool EasyAbstractDecoder::reset()
     return seek(0);
 }
 
-QByteArray EasyAbstractDecoder::read(qint64 maxSize)
+QByteArray EasyAbstractDecoder::readData(qint64 maxSize)
 {
     QByteArray result;
     if(!isOpen() || atEnd() || maxSize<1){
