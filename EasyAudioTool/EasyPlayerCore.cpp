@@ -160,7 +160,8 @@ void EasyPlayerCore::doPlay()
                 }
             }
         });
-        audioOutput->setNotifyInterval(350);
+        //播放间隔缩短一点，这样UI刷新进度看起来更流畅
+        audioOutput->setNotifyInterval(100);
     }
 
     //跳转
