@@ -19,6 +19,7 @@ namespace EasyAudioTool
 static void registerQmlType(QQmlEngine *engine)
 {
     QQmlContext *context = engine->rootContext();context;
+    qmlRegisterType<EasyAudio>("EasyAudioTool",1,0,"EasyAudio");
     qmlRegisterType<EasyAudioPlayer>("EasyAudioTool",1,0,"EasyAudioPlayer");
 }
 

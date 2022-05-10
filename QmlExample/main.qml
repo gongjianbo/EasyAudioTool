@@ -62,14 +62,27 @@ Window {
                     text: "len:"+player.duration
                 }
                 Button {
-                    text: player.onPlaying ? "pause" : "play"
+                    text: switch(player.playerState)
+                          {
+                          case EasyAudio.Playing: return "pause";
+                          case EasyAudio.Paused: return "resume";
+                          default: return "play";
+                          }
                     onClicked: {
-                        if(player.onPlaying){
-                            //暂停播放
+                        switch(player.playerState)
+                        {
+                        case EasyAudio.Playing:
+                            //播放或者暂停后继续
                             player.pause();
-                        }else{
+                            break;
+                        case EasyAudio.Paused:
+                            //暂停播放
+                            player.play();
+                            break;
+                        default:
                             //播放或者暂停后继续
                             player.play();
+                            break;
                         }
                     }
                 }
