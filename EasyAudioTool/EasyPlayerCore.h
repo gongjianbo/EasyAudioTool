@@ -7,6 +7,7 @@
 #include "EasyAudioCommon.h"
 #include "EasyAudioInterface.h"
 #include "EasyPlayerBuffer.h"
+#include "sonic.h"
 
 /**
  * @brief 实际播放音频部分
@@ -29,6 +30,11 @@ public:
     EasyAudio::PlayerState getPlayerState() const { return playerState; }
     void setPlayerState(EasyAudio::PlayerState state);
 
+    //speed倍速播放，speed/100.0f为实际倍速，即100为原速度
+    //core的speed只在stop时设置有效
+    int getPlaySpeed() const;
+    void setPlaySpeed(int speed);
+
     //播放进度 ms
     qint64 getPosition() const { return position; }
     void setPosition(qint64 pos);
@@ -38,8 +44,9 @@ public:
 
     //播放
     //filepath:音频文件路径
-    //ms:跳转到指定ms时间播放，<=0则不跳转
-    void play(const QString &filepath, qint64 ms = 0);
+    //offset:跳转到指定ms时间播放，<=0则不跳转
+    //checkDevice:=true时检测输出设备是否变更
+    void play(const QString &filepath, qint64 offset = 0, bool checkDevice = true);
     //暂停
     void suspend();
     //暂停后恢复播放
@@ -49,7 +56,14 @@ public:
 
 protected:
     //play初始化后调用
-    void doPlay();
+    //checkDevice:=true时检测输出设备是否变更
+    //因为获取设备信息比较耗时，调节seek和speed时不用校验
+    void doPlay(bool checkDevice);
+    //play时每次读取数据
+    void playReadData();
+    //使用sonic库变速
+    void initSonic();
+    void freeSonic();
 
 signals:
     //通知别的player断开信号槽链接
@@ -75,6 +89,10 @@ private:
     qint64 position{ 0 };
     //播放起始时间 ms
     qint64 playOffset{ 0 };
+    //播放倍速，使用时除以100.0f，也就是100时为原速
+    int playSpeed{ 100 };
+    //sonic变速操作的对象
+    sonicStream sonicInstance{ nullptr };
     //延时关闭
     QTimer stopTimer;
 

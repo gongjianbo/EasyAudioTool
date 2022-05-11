@@ -1,4 +1,5 @@
 #include "EasyAudioPlayer.h"
+#include "EasyPlayerCore.h"
 
 #include <QDebug>
 
@@ -83,6 +84,29 @@ void EasyAudioPlayer::setPosition(qint64 pos)
     }
 }
 
+int EasyAudioPlayer::getPlaySpeed() const
+{
+    return speedTemp;
+}
+
+void EasyAudioPlayer::setPlaySpeed(int speed)
+{
+    if(speedTemp == speed){
+        return;
+    }
+    speedTemp = speed;
+    if(core){
+        core->blockSignals(true);
+        core->stop();
+        core->blockSignals(false);
+        core->setPlaySpeed(speed);
+        if(getOnPlaying()){
+            core->play(getFilepath(), getPosition(), false);
+        }
+    }
+    emit playSpeedChanged();
+}
+
 qint64 EasyAudioPlayer::getDuration() const
 {
     if(getFilepath().isEmpty()){
@@ -111,6 +135,8 @@ void EasyAudioPlayer::prepare()
         setPosition(0);
         setPlayerState(EasyAudio::Stopped);
     });
+    //同步播放速度
+    core->setPlaySpeed(speedTemp);
 }
 
 void EasyAudioPlayer::play()
@@ -123,11 +149,12 @@ void EasyAudioPlayer::play()
         return;
     }
     //暂停就恢复，否则重新开始
-    //配合seek，palyer和core的state可能不同步
+    //配合seek和speed，设置时先阻塞信号再stop避免更新UI状态
+    //所以palyer和core的state可能不同步
     if(core->getPlayerState() == EasyAudio::Paused){
         core->resume();
     }else{
-        core->play(getFilepath(), getPosition());
+        core->play(getFilepath(), getPosition(), true);
     }
 }
 
@@ -181,6 +208,6 @@ void EasyAudioPlayer::seek(qint64 ms)
     core->blockSignals(false);
     setPosition(ms);
     if(getOnPlaying()){
-        core->play(getFilepath(), ms);
+        core->play(getFilepath(), ms, false);
     }
 }

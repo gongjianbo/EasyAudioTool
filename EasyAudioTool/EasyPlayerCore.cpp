@@ -1,6 +1,7 @@
 #include "EasyPlayerCore.h"
 
 #include "EasyAudioFactory.h"
+#include <QTime>
 #include <QDebug>
 
 EasyPlayerCore::EasyPlayerCore(QObject *parent)
@@ -24,10 +25,13 @@ EasyPlayerCore::EasyPlayerCore(QObject *parent)
         stopTimer.start(800); //1s左右
     });
     audioBuffer.open(QIODevice::ReadWrite);
+    //因为目前播放的采样率等信息是固定的，所以只需要在构造时初始化sonic
+    initSonic();
 }
 
 EasyPlayerCore::~EasyPlayerCore()
 {
+    freeSonic();
     stopTimer.stop();
     if(audioOutput){
         audioOutput->stop();
@@ -42,6 +46,18 @@ void EasyPlayerCore::setPlayerState(EasyAudio::PlayerState state)
     if(playerState != state){
         playerState = state;
         emit playerStateChanged(state);
+    }
+}
+
+int EasyPlayerCore::getPlaySpeed() const
+{
+    return playSpeed;
+}
+
+void EasyPlayerCore::setPlaySpeed(int speed)
+{
+    if(playSpeed != speed){
+        playSpeed = speed;
     }
 }
 
@@ -65,12 +81,12 @@ qint64 EasyPlayerCore::calcDuration(const QString &filepath)
     return 0;
 }
 
-void EasyPlayerCore::play(const QString &filepath, qint64 ms)
+void EasyPlayerCore::play(const QString &filepath, qint64 offset, bool checkDevice)
 {
-    //qDebug()<<__FUNCTION__<<ms<<filepath;
+    //qDebug()<<__FUNCTION__<<offset<<filepath;
     //跳转这部分时间和播放的时间加起来作为当前播放位置
-    playOffset = ms;
-    setPosition(ms);
+    playOffset = offset;
+    setPosition(offset);
     stopTimer.stop();
     audioBuffer.resetBuffer();
     audioDecoder.clear();
@@ -86,7 +102,7 @@ void EasyPlayerCore::play(const QString &filepath, qint64 ms)
         qDebug()<<"无法解析"<<filepath;
         return;
     }
-    doPlay();
+    doPlay(checkDevice);
 }
 
 void EasyPlayerCore::suspend()
@@ -125,17 +141,20 @@ void EasyPlayerCore::stop()
     setPlayerState(EasyAudio::Stopped);
 }
 
-void EasyPlayerCore::doPlay()
+void EasyPlayerCore::doPlay(bool checkDevice)
 {
-    //先判断设备和参数修改没，变更了就重新new
-    //因为目前只用到了defaultOutputDevice，所以只需要判断defaultOutputDevice信息
-    const QAudioDeviceInfo cur_default = QAudioDeviceInfo::defaultOutputDevice();
-    if(audioDevice != cur_default){
-        audioDevice = cur_default;
-        if(audioOutput){
-            audioOutput->stop();
-            audioOutput->deleteLater();
-            audioOutput = nullptr;
+    //因为获取设备信息比较耗时，调节seek和speed时不用校验
+    if(checkDevice){
+        //先判断设备和参数修改没，变更了就重新new
+        //因为目前只用到了defaultOutputDevice，所以只需要判断defaultOutputDevice信息
+        const QAudioDeviceInfo cur_default = QAudioDeviceInfo::defaultOutputDevice();
+        if(audioDevice != cur_default){
+            audioDevice = cur_default;
+            if(audioOutput){
+                audioOutput->stop();
+                audioOutput->deleteLater();
+                audioOutput = nullptr;
+            }
         }
     }
     if(!audioOutput){
@@ -148,16 +167,13 @@ void EasyPlayerCore::doPlay()
             //const int sample_rate=audioFormat.sampleRate();
             //const int sample_byte=audioFormat.sampleSize()/8;
             //const int read_ms=audioBuffer.getReadCount()/(channels*sample_rate*sample_byte/1000); //N/(0+1)
-            const int play_ms = playOffset+audioOutput->processedUSecs()/1000;
-            setPosition(play_ms);
+            const int play_ms = audioOutput->processedUSecs()/1000.0*(playSpeed/100.0);
+            setPosition(playOffset + play_ms);
             //qDebug()<<play_ms<<audioBuffer.getReadCount()<<audioBuffer.getWriteCount()
             //       <<audioBuffer.isWriteEnd()<<audioDecoder->atEnd();
             if(audioBuffer.isWaitWrite() && audioDecoder && !audioDecoder->atEnd()){
                 //每次读大约一分钟的数据
-                audioBuffer.appendData(audioDecoder->readData(EasyPlayerBuffer::getOnceLength()));
-                if(audioDecoder->atEnd()){
-                    audioBuffer.setWriteEnd(true);
-                }
+                playReadData();
             }
         });
         //播放间隔缩短一点，这样UI刷新进度看起来更流畅
@@ -169,11 +185,63 @@ void EasyPlayerCore::doPlay()
         audioDecoder->seek(getPosition());
     }
 
+    //测试变速
+    //playSpeed = 50;
     //每次读大约一分钟的数据
-    audioBuffer.appendData(audioDecoder->readData(EasyPlayerBuffer::getOnceLength()));
+    playReadData();
+    audioOutput->start(&audioBuffer);
+    setPlayerState(EasyAudio::Playing);
+}
+
+void EasyPlayerCore::playReadData()
+{
+    //每次读大约一分钟的数据
+    QByteArray read_once = audioDecoder->readData(EasyPlayerBuffer::getOnceLength());
+    if(!read_once.isEmpty()){
+        if(playSpeed != 100 && sonicInstance){
+            //使用sonic库对音频数据变速
+            float speed = playSpeed/100.0f;
+            sonicSetSpeed(sonicInstance, speed);
+            sonicWriteShortToStream(sonicInstance, (short*)read_once.data(), read_once.size()/2);
+            //向上取整
+            int new_size = std::ceil(read_once.size() / speed);
+            if(new_size % 2 != 0){
+                new_size++;
+            }
+            //TODO 异常情况暂时不处理
+            if(new_size > 0){
+                QByteArray new_data;
+                new_data.resize(new_size);
+                int ret_size = sonicReadShortFromStream(sonicInstance, (short*)new_data.data(), new_data.size()/2);
+                //返回的short长度
+                ret_size *= 2;
+                if(ret_size > new_size){
+                    ret_size = new_size;
+                    qDebug()<<"sonic read error. read out of buffer size.";
+                }
+                if(ret_size > 0){
+                    audioBuffer.appendData(new_data.left(ret_size));
+                }
+            }
+        }else{
+            audioBuffer.appendData(read_once);
+        }
+    }
     if(audioDecoder->atEnd()){
         audioBuffer.setWriteEnd(true);
     }
-    audioOutput->start(&audioBuffer);
-    setPlayerState(EasyAudio::Playing);
+}
+
+void EasyPlayerCore::initSonic()
+{
+    freeSonic();
+    sonicInstance = sonicCreateStream(audioFormat.sampleRate(), audioFormat.channelCount());
+}
+
+void EasyPlayerCore::freeSonic()
+{
+    if(sonicInstance){
+        sonicDestroyStream(sonicInstance);
+        sonicInstance = nullptr;
+    }
 }

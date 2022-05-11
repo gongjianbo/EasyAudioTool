@@ -1,7 +1,8 @@
 #pragma once
 #include <QObject>
 #include "EasyAudioCommon.h"
-#include "EasyPlayerCore.h"
+
+class EasyPlayerCore;
 
 /**
  * @brief 音频播放
@@ -22,6 +23,7 @@
  * @history
  * 2022-05-07 ListView多个Item共享Player变更为独立的Player
  * 2022-05-08 增加跳转播放
+ * 2022-05-11 增加倍速播放
  */
 class EASYAUDIOTOOL_EXPORT EasyAudioPlayer : public QObject
 {
@@ -30,6 +32,7 @@ class EASYAUDIOTOOL_EXPORT EasyAudioPlayer : public QObject
     Q_PROPERTY(EasyAudio::PlayerState playerState READ getPlayerState NOTIFY playerStateChanged)
     Q_PROPERTY(bool onPlaying READ getOnPlaying NOTIFY playerStateChanged)
     Q_PROPERTY(qint64 position READ getPosition NOTIFY positionChanged)
+    Q_PROPERTY(int playSpeed READ getPlaySpeed WRITE setPlaySpeed NOTIFY playSpeedChanged)
 public:
     explicit EasyAudioPlayer(QObject *parent = nullptr);
     ~EasyAudioPlayer();
@@ -48,6 +51,10 @@ public:
     //播放进度 ms
     qint64 getPosition() const;
     void setPosition(qint64 pos);
+
+    //speed倍速播放，speed/100.0f为实际倍速，即100为原速度
+    int getPlaySpeed() const;
+    void setPlaySpeed(int speed);
 
     //获取音频时长
     Q_INVOKABLE qint64 getDuration() const;
@@ -73,6 +80,7 @@ signals:
     void filepathChanged();
     void playerStateChanged();
     void positionChanged();
+    void playSpeedChanged();
 
 private:
     //音频文件路径
@@ -81,6 +89,8 @@ private:
     EasyAudio::PlayerState playerState{ EasyAudio::Stopped };
     //播放时间进度 ms
     qint64 position{ 0 };
+    //倍速播放暂存，关联core时同步到core
+    int speedTemp{ 100 };
 
     //实际播放加载内容作为单例
     EasyPlayerCore *core{ nullptr };

@@ -30,6 +30,10 @@ DEPENDPATH += $$PWD/../3rd/ffmpeg/include
 LIBS += $$PWD/../3rd/silksdk/lib/*.lib
 INCLUDEPATH += $$PWD/../3rd/silksdk/include
 DEPENDPATH += $$PWD/../3rd/silksdk/include
+
+LIBS += $$PWD/../3rd/libsonic/lib/*.lib
+INCLUDEPATH += $$PWD/../3rd/libsonic/include
+DEPENDPATH += $$PWD/../3rd/libsonic/include
 }
 }
 

@@ -5,8 +5,8 @@ import EasyAudioTool 1.0
 
 Window {
     id: root
-    width: 800
-    height: 500
+    width: 960
+    height: 640
     visible: true
 
     EasyTest {
@@ -124,6 +124,15 @@ Window {
                     onClicked: {
                         //停止
                         player.stop();
+                    }
+                }
+                ComboBox {
+                    id: speed_box
+                    model: ['0.5','0.75','1.0','1.25','1.5','2.0','3.0']
+                    property var speedArray: [50,75,100,125,150,200,300]
+                    currentIndex: 2
+                    onCurrentIndexChanged: {
+                        player.playSpeed = speedArray[currentIndex];
                     }
                 }
             }
