@@ -82,19 +82,21 @@ Window {
                 Text {
                     width: 200
                     elide: Text.ElideRight
-                    text: "path:"+player.filepath
+                    text: "filepath:"+player.filepath
                 }
                 Text {
-                    width: 120
+                    width: 150
                     elide: Text.ElideRight
-                    text: "pos:"+player.position
+                    text: "pos:"+player.formatMsToHSMZ(player.position)
                 }
                 Text {
-                    width: 120
+                    width: 150
                     elide: Text.ElideRight
-                    text: "len:"+player.duration
+                    text: "len:"+player.formatMsToHSMZ(player.duration)
                 }
                 Button {
+                    width: 60
+                    height: 32
                     text: switch(player.playerState)
                           {
                           case EasyAudio.Playing: return "pause";
@@ -120,6 +122,8 @@ Window {
                     }
                 }
                 Button {
+                    width: 60
+                    height: 32
                     text: "stop"
                     onClicked: {
                         //停止
@@ -128,6 +132,8 @@ Window {
                 }
                 ComboBox {
                     id: speed_box
+                    width: 120
+                    height: 32
                     model: ['0.5','0.75','1.0','1.25','1.5','2.0','3.0']
                     property var speedArray: [50,75,100,125,150,200,300]
                     currentIndex: 2

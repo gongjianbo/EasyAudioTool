@@ -115,6 +115,17 @@ qint64 EasyAudioPlayer::getDuration() const
     return EasyPlayerCore::calcDuration(getFilepath());
 }
 
+QString EasyAudioPlayer::formatMsToHSMZ(qint64 ms) const
+{
+    const qint64 time=ms/1000;
+    //注意运算符优先级
+    return QString("%1:%2:%3.%4")
+            .arg(time/3600%3600,2,10,QChar('0'))
+            .arg(time/60%60,2,10,QChar('0'))
+            .arg(time%60,2,10,QChar('0'))
+            .arg(ms%1000,3,10,QChar('0'));
+}
+
 void EasyAudioPlayer::prepare()
 {
     //已经加载过了就返回

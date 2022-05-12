@@ -58,6 +58,8 @@ public:
 
     //获取音频时长
     Q_INVOKABLE qint64 getDuration() const;
+    //时间ms转字符串"hh:mm:ss.zzz"
+    Q_INVOKABLE QString formatMsToHSMZ(qint64 ms) const;
 
 public slots:
     //切换core关联的player对象
