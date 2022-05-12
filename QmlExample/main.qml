@@ -63,9 +63,9 @@ Window {
             EasyAudioPlayer {
                 id: player
                 filepath: modelData
-                property real duration: 0
                 Component.onCompleted: {
-                    player.duration = player.getDuration();
+                    //在修改文件名后，播放之前重置duration
+                    player.updateDuration();
                 }
                 onPositionChanged: {
                     if(!slider.pressed){

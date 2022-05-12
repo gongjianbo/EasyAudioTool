@@ -71,6 +71,22 @@ bool EasyAudioPlayer::getIsPaused() const
     return (playerState == EasyAudio::Paused);
 }
 
+qint64 EasyAudioPlayer::getDuration() const
+{
+    return duration;
+}
+
+void EasyAudioPlayer::setDuration(qint64 len)
+{
+    if(len < 0){
+        len = 0;
+    }
+    if(duration != len){
+        duration = len;
+        emit durationChanged();
+    }
+}
+
 qint64 EasyAudioPlayer::getPosition() const
 {
     return position;
@@ -78,6 +94,12 @@ qint64 EasyAudioPlayer::getPosition() const
 
 void EasyAudioPlayer::setPosition(qint64 pos)
 {
+    if(pos > duration){
+        pos = duration;
+    }
+    if(pos < 0){
+        pos = 0;
+    }
     if(position != pos){
         position = pos;
         emit positionChanged();
@@ -107,12 +129,12 @@ void EasyAudioPlayer::setPlaySpeed(int speed)
     emit playSpeedChanged();
 }
 
-qint64 EasyAudioPlayer::getDuration() const
+void EasyAudioPlayer::updateDuration()
 {
     if(getFilepath().isEmpty()){
-        return 0;
+        return;
     }
-    return EasyPlayerCore::calcDuration(getFilepath());
+    setDuration(EasyPlayerCore::calcDuration(getFilepath()));
 }
 
 QString EasyAudioPlayer::formatMsToHSMZ(qint64 ms) const
@@ -219,6 +241,6 @@ void EasyAudioPlayer::seek(qint64 ms)
     core->blockSignals(false);
     setPosition(ms);
     if(getOnPlaying()){
-        core->play(getFilepath(), ms, false);
+        core->play(getFilepath(), getPosition(), false);
     }
 }

@@ -31,6 +31,7 @@ class EASYAUDIOTOOL_EXPORT EasyAudioPlayer : public QObject
     Q_PROPERTY(QString filepath READ getFilepath WRITE setFilepath NOTIFY filepathChanged)
     Q_PROPERTY(EasyAudio::PlayerState playerState READ getPlayerState NOTIFY playerStateChanged)
     Q_PROPERTY(bool onPlaying READ getOnPlaying NOTIFY playerStateChanged)
+    Q_PROPERTY(qint64 duration READ getDuration NOTIFY durationChanged)
     Q_PROPERTY(qint64 position READ getPosition NOTIFY positionChanged)
     Q_PROPERTY(int playSpeed READ getPlaySpeed WRITE setPlaySpeed NOTIFY playSpeedChanged)
 public:
@@ -48,6 +49,10 @@ public:
     bool getIsStopped() const;
     bool getIsPaused() const;
 
+    //音频时长 ms，设置文件路径后updateDuration更新
+    qint64 getDuration() const;
+    void setDuration(qint64 len);
+
     //播放进度 ms
     qint64 getPosition() const;
     void setPosition(qint64 pos);
@@ -56,8 +61,8 @@ public:
     int getPlaySpeed() const;
     void setPlaySpeed(int speed);
 
-    //获取音频时长
-    Q_INVOKABLE qint64 getDuration() const;
+    //更新音频时长，切换or编辑文件后手动调用
+    Q_INVOKABLE void updateDuration();
     //时间ms转字符串"hh:mm:ss.zzz"
     Q_INVOKABLE QString formatMsToHSMZ(qint64 ms) const;
 
@@ -81,6 +86,7 @@ public slots:
 signals:
     void filepathChanged();
     void playerStateChanged();
+    void durationChanged();
     void positionChanged();
     void playSpeedChanged();
 
@@ -89,6 +95,8 @@ private:
     QString audioPath;
     //播放状态
     EasyAudio::PlayerState playerState{ EasyAudio::Stopped };
+    //音频时长
+    qint64 duration{ 0 };
     //播放时间进度 ms
     qint64 position{ 0 };
     //倍速播放暂存，关联core时同步到core
