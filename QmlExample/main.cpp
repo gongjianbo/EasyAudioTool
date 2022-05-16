@@ -2,6 +2,7 @@
 #include <QQmlApplicationEngine>
 #include <QSettings>
 #include "EasyAudioTool.h"
+#include "EasyModel.h"
 #include "EasyTest.h"
 
 int main(int argc, char *argv[])
@@ -17,6 +18,7 @@ int main(int argc, char *argv[])
     //注册qml组件
     EasyAudioTool::registerQmlType(&engine);
     EasyAudioTool::registerMetaType();
+    qmlRegisterType<EasyModel>("EasyAudioTool",1,0,"EasyModel");
     qmlRegisterType<EasyTest>("EasyAudioTool",1,0,"EasyTest");
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));

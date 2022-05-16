@@ -9,7 +9,10 @@ class EasyTest : public QObject
 public:
     explicit EasyTest(QObject *parent = nullptr);
 
+    //【】测试转码
+    //开始转码
     Q_INVOKABLE void transcodeRun(const QString &filepath);
+    //取消转码
     Q_INVOKABLE void transcodeCancel();
 
 private:
