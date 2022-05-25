@@ -92,12 +92,17 @@ bool EasyAudioTool::transcodeToWavFile(const QString &srcPath, const QString &de
             }
             //头覆盖
             write_file.seek(0);
-            head = EasyWavHead::createHead(destFormat, dest_count);
-            write_file.write(QByteArray((char*)&head, sizeof(EasyWavHead)));
+            head = EasyWavHead(destFormat, dest_count);
+            write_file.write((const char*)&head, sizeof(EasyWavHead));
+            trans_result = head.isValid();
+            if(!trans_result){
+                qDebug()<<"transcode error. head invalid.";
+            }
         }else{
             qDebug()<<"transcode error. count"<<dest_count<<"run flag"<<bool(runflag);
         }
         //关闭文件
+        write_file.waitForBytesWritten(3000);
         write_file.close();
     }
     //解码结束

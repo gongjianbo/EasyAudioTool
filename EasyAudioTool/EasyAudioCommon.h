@@ -1,5 +1,6 @@
 #pragma once
 //本文件用于定义数据结构及全局变量等
+#include <QtCore/qglobal.h>
 #include <QMetaObject>
 #include <QAudioFormat>
 #include <QSharedPointer>
@@ -8,8 +9,6 @@
 #include <cmath>
 #include <algorithm>
 #include <functional>
-
-#include <QtCore/qglobal.h>
 
 //导入导出符号
 #if defined(EASYAUDIOTOOL_LIBRARY)
@@ -31,22 +30,25 @@
 //ffmpeg  AVSampleFormat(=AV_SAMPLE_FMT_S16)
 
 /**
- * @brief wav-pcm文件头结构体
+ * @brief wav文件头结构体
  * @author 龚建波
  * @date 2020-11-12
  * @details
- * 1.wav头是不定长格式，为了简化操作这里用的固定44字节长格式
- * 2.数值以小端存储，不过pc一般是小端存储，暂不特殊处理
- * 3.参照列表
+ * wav格式头是不定长的，不过这里用的比较简单的固定格式，便于处理
+ * 包含RIFF块、文件格式标志、fmt块、压缩编码时fact块、data块
+ * （数值以小端存储，不过pc一般默认小端存储，暂不特殊处理）
  * 参照：https://www.cnblogs.com/ranson7zop/p/7657874.html
  * 参照：https://www.cnblogs.com/Ph-one/p/6839892.html
- * 参照：https://blog.csdn.net/imxiangzi/article/details/80265978
+ * 参照：http://mobile.soomal.com/doc/10100001099.htm
+ * @todo
+ * 划分为RIFF和RF64，以支持更长的数据内容
  * @note
- * 1.最大元素为4字节，所以本身就是44字节对齐的
- * 加字节对齐只是为了提醒
- * 2.pcm导出为wav时使用，解析时慎用
- * @history
- * 2021-03-30 更新注释
+ * 此处wav/wave指Microsoft Wave音频文件格式，后缀为".wav"
+ * wave长度变量为uint32四个字节，只支持到4GB（2^32）
+ * （网上有说只支持2G，用工具拼接实测是可以支持到接近4GB的）
+ * 对于更长的数据，可以使用Sony Wave64，后缀为".w64"；
+ * 或者使用RF64，RF64即RIFF的64bit版本。
+ * Adobe Audition软件保存wav时如果数据超过4GB，会使用RF64格式保存
  */
 #pragma pack(push,1)
 struct EASYAUDIOTOOL_EXPORT EasyWavHead
@@ -72,11 +74,32 @@ struct EASYAUDIOTOOL_EXPORT EasyWavHead
     char dataFlag[4]; //表示数据开头，小写"data"
     unsigned int dataSize; //数据部分的长度
 
-    //根据设置生成wav(pcm)文件头信息
-    //params:参数信息
-    //dataSize:pcm数据字节长度
-    //return EasyAudioWavHead: wav头
-    static EasyWavHead createHead(const QAudioFormat &format, unsigned int dataSize);
+    //默认构造
+    EasyWavHead();
+
+    /**
+     * @brief 根据采样率、精度等参数构造wav格式头
+     * @param format Qt音频格式类，包含有采样率、精度等信息
+     * @param dataSize 有效数据字节数
+     */
+    EasyWavHead(const QAudioFormat &format, unsigned int dataSize);
+
+    /**
+     * @brief 根据采样率、精度等参数构造wav格式头
+     * @param sampleRate 采样率，如16000Hz
+     * @param sampleSize 采样精度，如16位
+     * @param channelCount 声道数，如1单声道
+     * @param dataSize 有效数据字节数
+     */
+    EasyWavHead(int sampleRate, int sampleSize,
+                int channelCount, unsigned int dataSize);
+
+    /**
+     * @brief 判断该wav头参数是否有效
+     * 主要用在读取并解析使用该头格式写的文件
+     * @return =true则格式有效
+     */
+    bool isValid() const;
 };
 #pragma pack(pop)
 Q_DECLARE_METATYPE(EasyWavHead)
