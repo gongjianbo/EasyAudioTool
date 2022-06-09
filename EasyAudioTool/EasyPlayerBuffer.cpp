@@ -53,6 +53,8 @@ void EasyPlayerBuffer::resetBuffer()
     writeCount = 0;
     audioOffset = 0;
     audioData.clear();
+    readEnd = false;
+    writeEnd = false;
 }
 
 bool EasyPlayerBuffer::isWaitWrite() const
