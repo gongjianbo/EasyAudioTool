@@ -24,11 +24,25 @@ public:
     //文件转码为wav格式
     //目前仅测试wav-16K-单声道-16bit
     //srcPath:源文件路径
-    //destPath:目标路径
-    //destFormat:目标格式
+    //tagretPath:目标路径
+    //tagretFormat:目标格式
     //runflag:=false则停止转码，返回false
-    static bool transcodeToWavFile(const QString &srcPath, const QString &destPath,
-                                   const QAudioFormat &destFormat, const std::atomic_bool &runflag);
+    static bool transcodeToWavFile(const QString &srcPath, const QString &tagretPath,
+                                   const QAudioFormat &tagretFormat, const std::atomic_bool &runflag);
+
+    //文件转码为wav格式
+    //目前仅测试wav-16K-单声道-16bit
+    //sourcePath:源文件路径
+    //targetDir:目标路径，文件名在路径下以"{uuid}.wav"命名
+    //targetFormat:目标格式
+    //limitSize:每个文件分片大小，超过分片大小则生成新文件
+    //runflag:=false则停止转码，返回false
+    //返回文件信息列表list<uuid,filepath>
+    static auto transcodeToWavFile(const QString &sourcePath, const QString &targetDir,
+                                   const QAudioFormat &targetFormat, const qint64 &limitSize,
+                                   const std::atomic_bool &runflag)
+    ->QList<QPair<QString, QString>>;
+
     //默认导出格式
     static QAudioFormat defaultFormat();
 };

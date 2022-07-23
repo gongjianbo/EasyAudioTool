@@ -143,7 +143,7 @@ void EasyModel::parseDir(const QString &filedir, const QStringList &filter)
             //先过滤文件列表
             const QFileInfoList info_list = dir.entryInfoList(filter,QDir::Files|QDir::NoSymLinks);
             QList<QString> file_list;
-            for(const QFileInfo &info : info_list)
+            for(auto &info : info_list)
             {
                 file_list.push_back(info.filePath());
             }
