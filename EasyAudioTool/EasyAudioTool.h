@@ -43,6 +43,19 @@ public:
                                    const std::atomic_bool &runflag)
     ->QList<QPair<QString, QString>>;
 
+    //文件拼接为wav格式
+    //目前仅测试wav-16K-单声道-16bit
+    //sourcePaths:源文件路径列表
+    //targetDir:目标路径，文件名在路径下以"{uuid}.wav"命名
+    //targetFormat:目标格式
+    //limitSize:每个文件分片大小，超过分片大小则生成新文件
+    //runflag:=false则停止转码，返回false
+    //返回文件信息列表list<uuid,filepath>
+    static auto stitchToWavFile(const QList<QString> &sourcePaths, const QString &targetDir,
+                                const QAudioFormat &targetFormat, const qint64 &limitSize,
+                                const std::atomic_bool &runflag)
+    ->QList<QPair<QString, QString>>;
+
     //默认导出格式
     static QAudioFormat defaultFormat();
 };

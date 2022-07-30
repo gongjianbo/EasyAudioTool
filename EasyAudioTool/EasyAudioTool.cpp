@@ -267,6 +267,163 @@ auto EasyAudioTool::transcodeToWavFile(const QString &sourcePath, const QString 
     return trans_result;
 }
 
+auto EasyAudioTool::stitchToWavFile(const QList<QString> &sourcePaths, const QString &targetDir,
+                                    const QAudioFormat &targetFormat, const qint64 &limitSize,
+                                    const std::atomic_bool &runflag)
+->QList<QPair<QString, QString>>
+{
+    //存拼接结果信息
+    QList<QPair<QString, QString>> trans_result;
+
+    QDir tgt_dir(targetDir);
+    //原文件不存在
+    //目标目录不存在或者未生成
+    if(sourcePaths.isEmpty() || !(tgt_dir.exists() || tgt_dir.mkpath(targetDir))){
+        qDebug()<<"transcode path error."<<sourcePaths.size()<<tgt_dir;
+        return trans_result;
+    }
+
+    //缓冲区
+    const qint64 buffer_max = 1024*1024*10;
+    QByteArray buffer;
+    buffer.resize(buffer_max);
+    //缓冲区已有数据大小
+    qint64 buffer_has = 0;
+    //当前分片文件写出的大小
+    qint64 slice_size = 0;
+    //写入目标文件
+    QString target_uuid; // = QUuid::createUuid().toString();
+    QString target_path; // = QString("%1/%2.wav").arg(targetDir).arg(target_uuid);
+    QFile write_file;
+
+    //写文件操作
+    std::function<bool(const char*, qint64)> call_write = [&](const char* pcmData, qint64 pcmSize)
+    {
+        qint64 write_offset = 0;
+        qint64 pcm_has = pcmSize;
+        while(pcm_has > 0){
+            //每次写入前判断是否要新建文件
+            if(!write_file.isOpen()){
+                target_uuid = QUuid::createUuid().toString();
+                target_path = QString("%1/%2.wav").arg(targetDir).arg(target_uuid);
+                write_file.setFileName(target_path);
+                if(!write_file.open(QIODevice::WriteOnly | QIODevice::Truncate)){
+                    return false;
+                }
+                EasyWavHead head;
+                //头占位
+                write_file.write(QByteArray((char*)&head, sizeof(EasyWavHead)));
+                slice_size = 0;
+                trans_result.push_back({target_uuid, target_path});
+            }
+            //qDebug()<<write_offset<<slice_size<<pcm_has<<limitSize;
+            if(slice_size + pcm_has >= limitSize){
+                write_file.write(pcmData+write_offset, (limitSize-slice_size));
+                write_offset += (limitSize-slice_size);
+                pcm_has -= (limitSize-slice_size);
+                slice_size = limitSize;
+                EasyWavHead head;
+                //头覆盖
+                write_file.seek(0);
+                head = EasyWavHead(targetFormat, slice_size);
+                write_file.write(QByteArray((char*)&head, sizeof(EasyWavHead)));
+                write_file.close();
+            }else{
+                write_file.write(pcmData+write_offset, pcm_has);
+                write_offset += pcm_has;
+                slice_size += pcm_has;
+                //全部写出，剩余长度置零
+                pcm_has = 0;
+            }
+        }
+        return true;
+    };
+
+    //转码实时写入目标文件
+    //toPcm的回调参数
+    std::function<bool(const char*, qint64)> call_back = [&](const char* pcmData, qint64 pcmSize)
+    {
+        //中断
+        if(!runflag){
+            return false;
+        }
+        if(pcmSize + buffer_has >= buffer_max){
+            //先把缓存清空
+            if(buffer_has > 0){
+                if(!call_write(buffer.data(), buffer_has)){
+                    return false;
+                }
+                buffer_has = 0;
+            }
+            if(pcmSize >= buffer_max){
+                if(!call_write(pcmData, pcmSize)){
+                    return false;
+                }
+            }else{
+                memcpy(buffer.data()+buffer_has, pcmData, pcmSize);
+                buffer_has += pcmSize;
+            }
+        }else{
+            memcpy(buffer.data()+buffer_has, pcmData, pcmSize);
+            buffer_has += pcmSize;
+        }
+        return true;
+    };
+
+    bool trans_valid = true;
+    //对每个文件都转码
+    for(int i = 0; i < sourcePaths.size(); i++)
+    {
+        if(!runflag){
+            trans_valid = false;
+            break;
+        }
+        //解码失败
+        QSharedPointer<EasyAbstractDecoder> p_decoder = EasyAudioFactory::createDecoder(sourcePaths.at(i));
+        if(!p_decoder || !p_decoder->isValid() || !p_decoder->open(targetFormat)){
+            qDebug()<<"transcode parse error. ";
+            return trans_result;
+        }
+        qint64 out_count = p_decoder->readAll(call_back);
+        //没转出数据说明失败了
+        const bool trans_ok = (out_count>0 && runflag);
+        if(!trans_ok){
+            qDebug()<<"transcode error. row"<<i;
+        }
+
+        //解码结束
+        p_decoder->close();
+    }
+
+    //转成功就把尾巴上的写入，无效的转换就把文件删除
+    if(trans_valid){
+        //尾巴上那点写文件
+        if(buffer_has > 0){
+            call_write(buffer.data(), buffer_has);
+            buffer_has = 0;
+        }
+        //文件尾
+        if(write_file.isOpen()){
+            EasyWavHead head;
+            //头覆盖
+            write_file.seek(0);
+            head = EasyWavHead(targetFormat, slice_size);
+            write_file.write(QByteArray((char*)&head, sizeof(EasyWavHead)));
+            write_file.close();
+        }
+    }else{
+        write_file.close();
+        qDebug()<<"stitch write error. remove file."<<trans_result.size()<<"run flag"<<bool(runflag);
+        for(const auto &trans_pair : qAsConst(trans_result))
+        {
+            QFile::remove(trans_pair.second);
+        }
+        trans_result.clear();
+    }
+
+    return trans_result;
+}
+
 QAudioFormat EasyAudioTool::defaultFormat()
 {
     QAudioFormat format;
