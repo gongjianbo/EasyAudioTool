@@ -10,6 +10,7 @@
  * @details
  * 1.DecControlStruct只看到采样率设置，精度默认16bit通道默认1
  * 采样率可选项4种：8000,12000,16000,24000
+ * 2.目前展示信息时默认取单声道16K16bit，但是silk是可变采样的
  */
 class EASYAUDIOTOOL_EXPORT EasySilkContext final : public EasyAbstractContext
 {

@@ -41,14 +41,18 @@ EasyAudioInfo EasyFFmpegContext::audioInfo() const
 
     //mov格式单独处理，默认返回的是一个列表
     info.format = formatCtx->iformat->name; //如mp3 wav
-    if(info.format.startsWith("mov"))
+    if(info.format.startsWith("mov")){
         info.format = getMovFormat();
-
+    }
     info.encode = codec->name; //如pcm_s16
-    info.channels = codecCtx->channels;
-
-    info.sampleRate = codecCtx->sample_rate; //hz
-    info.sampleBit = (av_get_bytes_per_sample(codecCtx->sample_fmt)<<3);  //bit
+    info.channels = codecParam->channels;
+    info.sampleRate = codecParam->sample_rate; //hz
+    //2020-08-25 之前取的容器的位宽，不是数据的
+    //info.sampleBit = (av_get_bytes_per_sample(codecCtx->sample_fmt)<<3);  //bit
+    info.sampleBit = av_get_bits_per_sample(codecParam->codec_id);
+    //if (codecCtx && codecCtx->bits_per_raw_sample > 0) {
+    //    info.sampleBit = codecCtx->bits_per_raw_sample;
+    //}
     //2020-12-31 测试一个ape文件时发现音频信息比特率为0，现判断无效则使用容器比特率
     info.bitRate = codecCtx->bit_rate<1?formatCtx->bit_rate:codecCtx->bit_rate; //bps
     info.duration = formatCtx->duration/(AV_TIME_BASE/1000.0);  //ms
@@ -157,8 +161,10 @@ void EasyFFmpegContext::initContext(const QString &filepath)
         AVStream *in_stream = formatCtx->streams[i];
 
         //类型为音频
-        if(in_stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO){
-            audioStreamIndex = i;
+        if(in_stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO)
+        {
+            codecParam = in_stream->codecpar;
+            streamIndex = i;
             //查找具有匹配编解码器ID的已注册解码器
             //失败返回NULL
             codec = avcodec_find_decoder(in_stream->codecpar->codec_id);
@@ -234,6 +240,7 @@ void EasyFFmpegContext::freeContext()
     }
     codec = NULL;
     codecCtx = NULL;
+    codecParam = NULL;
     formatCtx = NULL;
 }
 

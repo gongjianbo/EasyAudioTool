@@ -144,7 +144,7 @@ qint64 EasyFFmpegDecoder::read(char *outBuffer, qint64 maxSize)
     while (av_read_frame(theContextPtr->formatCtx, packet) >= 0)
     {
         //取音频
-        if(packet->stream_index == theContextPtr->audioStreamIndex)
+        if(packet->stream_index == theContextPtr->streamIndex)
         {
             //提供原始数据作为解码器的输入(将packet写入到解码队列当中去)
             //返回0表示成功
@@ -244,7 +244,7 @@ qint64 EasyFFmpegDecoder::readAll(std::function<bool (const char *, qint64)> cal
     while (av_read_frame(theContextPtr->formatCtx, packet) >= 0)
     {
         //取音频
-        if (packet->stream_index == theContextPtr->audioStreamIndex)
+        if (packet->stream_index == theContextPtr->streamIndex)
         {
             //提供原始数据作为解码器的输入(将packet写入到解码队列当中去)
             //返回0表示成功

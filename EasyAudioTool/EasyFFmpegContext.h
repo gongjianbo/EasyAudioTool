@@ -27,6 +27,8 @@ extern "C" {
  *
  * @todo
  * 内存泄露测试
+ * @history
+ * 2022-08-25 修复采样精度读取错误问题
  */
 class EASYAUDIOTOOL_EXPORT EasyFFmpegContext final : public EasyAbstractContext
 {
@@ -69,8 +71,10 @@ private:
     AVCodec *codec{ NULL };
     //解码器上下文
     AVCodecContext *codecCtx{ NULL };
+    //参数信息
+    AVCodecParameters *codecParam{ NULL };
     //音频流index
-    int audioStreamIndex{ -1 };
+    int streamIndex{ -1 };
 
     //暂存音频信息，便于重复读取
     mutable bool hasInfoTemp{ false };
